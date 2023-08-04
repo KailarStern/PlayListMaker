@@ -1,93 +1,88 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/blue">
+    android:background="@color/blue"
+    android:orientation="vertical"
+    android:paddingStart="@dimen/size_16dp"
+    android:paddingEnd="@dimen/size_16dp">
 
-    <LinearLayout
+    <TextView
+        android:id="@+id/textMainView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="12dp"
+        android:text="@string/title"
+        android:textColor="@color/white"
+        android:textSize="@dimen/textSize" />
+
+
+    <Button
+        android:id="@+id/buttonMainSearch"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical">
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:layout_marginTop="24dp"
+        android:layout_marginHorizontal="@dimen/size_16dp"
+        android:backgroundTint="@color/white"
+        android:gravity="center"
+        app:icon="@drawable/button_search"
+        app:iconGravity="textStart"
+        app:iconPadding="@dimen/size_8dp"
+        app:iconTint="@color/YPblack"
+        app:cornerRadius="@dimen/buttonRadius"
+        android:text="@string/search"
+        android:textColor="@color/YPblack"
+        android:textSize="@dimen/textSize"
+        android:textAllCaps="false"/>
 
 
-        <TextView
-            android:id="@+id/text_view"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="12dp"
-            android:layout_marginTop="10dp"
-            android:layout_marginBottom="12dp"
-            android:text="@string/title"
-            android:textColor="@color/white"
-            android:textSize="@dimen/text_size" />
+    <Button
+        android:id="@+id/buttonMainMediateka"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:layout_marginTop="@dimen/size_16dp"
+        android:layout_marginBottom="@dimen/size_16dp"
+        android:layout_marginHorizontal="@dimen/size_16dp"
+        android:backgroundTint="@color/white"
+        android:gravity="center"
+        app:icon="@drawable/button_mediateka"
+        app:iconGravity="textStart"
+        app:iconPadding="@dimen/size_8dp"
+        app:iconTint="@color/YPblack"
+        app:cornerRadius="@dimen/buttonRadius"
+        android:text="@string/mediateka"
+        android:textColor="@color/YPblack"
+        android:textSize="@dimen/textSize"
+        android:textAllCaps="false"/>
 
 
-        <Button
-            android:id="@+id/button_big_1"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            android:layout_marginStart="16dp"
-            android:layout_marginEnd="16dp"
-            android:layout_marginTop="28dp"
-            android:backgroundTint="@color/white"
-            android:gravity="center"
-            app:icon="@drawable/button_search"
-            app:iconGravity="textStart"
-            app:iconPadding="8dp"
-            app:iconTint="@color/YPblack"
-            app:cornerRadius="16dp"
-            android:text="@string/search"
-            android:textColor="@color/YPblack"
-            android:textSize="@dimen/text_size"
-            android:textAllCaps="false"/>
+    <Button
+        android:id="@+id/buttonMainSettings"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:layout_marginBottom="24dp"
+        android:layout_marginHorizontal="@dimen/size_16dp"
+        android:backgroundTint="@color/white"
+        android:gravity="center"
+        app:icon="@drawable/button_settings"
+        app:iconGravity="textStart"
+        app:iconPadding="@dimen/size_8dp"
+        app:iconTint="@color/YPblack"
+        app:cornerRadius="@dimen/buttonRadius"
+        android:text="@string/settings"
+        android:textColor="@color/YPblack"
+        android:textSize="@dimen/textSize"
+        android:textAllCaps="false"/>
+
+</LinearLayout>
+     <!--так и не понял проблему с размером текста и кнопок, так в фигме иконки тоже чуть больше текста
+     так же непонятно с выносом ресурсов. постарался вынести, но не понимаю практическое назначение-->
 
 
-        <Button
-            android:id="@+id/button_big_2"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            android:layout_marginStart="16dp"
-            android:layout_marginEnd="16dp"
-            android:layout_marginTop="16dp"
-            android:layout_marginBottom="16dp"
-            android:backgroundTint="@color/white"
-            android:gravity="center"
-            app:icon="@drawable/button_mediateka"
-            app:iconGravity="textStart"
-            app:iconPadding="8dp"
-            app:iconTint="@color/YPblack"
-            app:cornerRadius="16dp"
-            android:text="@string/mediateka"
-            android:textColor="@color/YPblack"
-            android:textSize="@dimen/text_size"
-            android:textAllCaps="false"/>
 
-
-        <Button
-            android:id="@+id/button_big_3"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            android:layout_marginStart="16dp"
-            android:layout_marginEnd="16dp"
-            android:layout_marginBottom="24dp"
-            android:backgroundTint="@color/white"
-            android:gravity="center"
-            app:icon="@drawable/button_settings"
-            app:iconGravity="textStart"
-            app:iconPadding="8dp"
-            app:iconTint="@color/YPblack"
-            app:cornerRadius="8dp"
-            android:text="@string/settings"
-            android:textColor="@color/YPblack"
-            android:textSize="@dimen/text_size"
-            android:textAllCaps="false"/>
-
-
-    </LinearLayout>
-
-</RelativeLayout>

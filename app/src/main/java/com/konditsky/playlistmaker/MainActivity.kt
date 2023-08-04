@@ -12,9 +12,9 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        val button1 = findViewById<Button>(R.id.button_big_1)
-        val button2 = findViewById<Button>(R.id.button_big_2)
-        val button3 = findViewById<Button>(R.id.button_big_3)
+        val button1 = findViewById<Button>(R.id.buttonMainSearch)
+        val button2 = findViewById<Button>(R.id.buttonMainMediateka)
+        val button3 = findViewById<Button>(R.id.buttonMainSettings)
 
         button1.setOnClickListener {
             val intent = Intent(this, SearchActivity::class.java)
@@ -31,4 +31,4 @@ class MainActivity : AppCompatActivity() {
             startActivity(intent)
         }
     }
-} // попытка сделать пул реквест
+}
