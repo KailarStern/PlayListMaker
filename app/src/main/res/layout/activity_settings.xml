@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/settings"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white"
+    android:orientation="vertical">
+
+
+    <LinearLayout
+        android:id="@+id/panelSettingsHeader"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:orientation="horizontal">
+        <ImageButton
+            android:id="@+id/buttonSettingsBack"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_marginStart="4dp"
+            android:layout_marginTop="4dp"
+            android:layout_marginBottom="4dp"
+            android:layout_gravity="center"
+            android:background="@android:color/transparent"
+            android:contentDescription="@string/description_back_button"
+            app:srcCompat="@drawable/arrowleft" />
+
+        <TextView
+            android:id="@+id/textSettingsBack"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:layout_gravity="center"
+            android:layout_weight="1"
+            android:text="@string/settings"
+            android:textSize="@dimen/textSize"
+            android:textColor="@color/black" />
+    </LinearLayout>
+
+
+
+
+    <FrameLayout
+        android:id="@+id/listSettingsTheme"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/size_61dp"
+        android:layout_marginTop="24dp"
+        android:background="?android:attr/selectableItemBackground"
+        android:clickable="true"
+        android:focusable="true">
+
+        <TextView
+            android:id="@+id/textSettingsTheme"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical|start"
+            android:layout_marginStart="@dimen/size_16dp"
+            android:text="@string/theme"
+            android:textColor="@color/black" />
+
+        <Switch
+            android:id="@+id/switchSettingsTheme"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical|end"
+            android:layout_marginEnd="@dimen/size_18dp" />
+    </FrameLayout>
+
+
+
+    <FrameLayout
+        android:id="@+id/listSettingsShare"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/size_61dp"
+        android:background="?android:attr/selectableItemBackground"
+        android:clickable="true"
+        android:focusable="true">
+
+        <TextView
+            android:id="@+id/textSettingsShare"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical|start"
+            android:layout_marginStart="@dimen/size_16dp"
+            android:text="@string/share"
+            android:textColor="@color/black" />
+
+        <ImageView
+            android:id="@+id/imageSettingsShare"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical|end"
+            android:layout_marginEnd="@dimen/size_18dp"
+            app:srcCompat="@drawable/share" />
+    </FrameLayout>
+
+
+
+    <FrameLayout
+        android:id="@+id/listSettingsSupport"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/size_61dp"
+        android:background="?android:attr/selectableItemBackground"
+        android:clickable="true"
+        android:focusable="true">
+
+        <TextView
+            android:id="@+id/textSettingsSupport"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical|start"
+            android:layout_marginStart="@dimen/size_16dp"
+            android:text="@string/support"
+            android:textColor="@color/black" />
+
+        <ImageView
+            android:id="@+id/imageSettingsSupport"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical|end"
+            android:layout_marginEnd="@dimen/size_18dp"
+            app:srcCompat="@drawable/support" />
+    </FrameLayout>
+
+
+    <FrameLayout
+        android:id="@+id/listSettingsTerms"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/size_61dp"
+        android:background="?android:attr/selectableItemBackground"
+        android:clickable="true"
+        android:focusable="true">
+
+        <TextView
+            android:id="@+id/textSettingsTerms"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical|start"
+            android:layout_marginStart="@dimen/size_16dp"
+            android:text="@string/terms"
+            android:textColor="@color/black" />
+
+        <ImageView
+            android:id="@+id/imageSettingsTerms"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical|end"
+            android:layout_marginEnd="@dimen/size_18dp"
+            app:srcCompat="@drawable/arrowright" />
+    </FrameLayout>
+
+
+</LinearLayout>
+<!-- постарался вынести в dimens те значения что встречаются хотя бы 4 раза
+непонятно что имеется в виду когда говорят что должны быть идентичны.
+Возьмём пример с 1ым экраном. "Playlist maker" находится в области которая находится в области.-->
+
