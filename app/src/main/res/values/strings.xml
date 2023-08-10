@@ -9,7 +9,9 @@
     <string name="support">Написать в поддержку</string>
     <string name="terms">Пользовательское соглашение</string>
     <string name="description_back_button">Назад</string>
-
-
+    <string name="yandexLinkDeveloper">https://practicum.yandex.ru/profile/android-developer/</string>
+    <string name="text_to_dv1st">Сообщение разработчикам и разработчицам приложения Playlist Maker</string>
+    <string name="text_to_dv2st">Спасибо разработчикам и разработчицам за крутое приложение!</string>
+    <string name="yandexLinkOffer">https://practicum.yandex.ru/profile/android-developer/</string>
 
 </resources>
