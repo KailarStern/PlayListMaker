@@ -8,5 +8,6 @@
     <color name="YPTextGray">#AEAFB4</color>
     <color name="YPBlueLight">#9FBBF3</color>
     <color name="ColorForREBG">#E6E8EB</color>
-    <color name="text_and_icon_color">@color/YPTextGray</color>
+    <color name="iconSearchActivity">#AEAFB4</color>
+    <color name="textSearchActivity">#FF000000</color>
 </resources>

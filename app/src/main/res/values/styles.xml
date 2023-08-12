@@ -6,7 +6,7 @@
         </style>
 
 
-        <style name="MainButtonStyle">
+        <style name="MainButtonStyle" parent="Widget.MaterialComponents.Button.UnelevatedButton">
             <item name="android:layout_width">match_parent</item>
             <item name="android:layout_height">0dp</item>
             <item name="android:layout_weight">1</item>
@@ -69,15 +69,13 @@
 
 
     <style name="SearchEditTextStyle">
-        <item name="android:drawableTint">@color/text_and_icon_color</item>
-        <item name="android:textColorHint">@color/text_and_icon_color</item>
+        <item name="android:drawableTint">@color/iconSearchActivity</item>
+        <item name="android:textColorHint">@color/iconSearchActivity</item>
+        <item name="android:textColor">@color/textSearchActivity</item>
         <item name="android:paddingStart">12dp</item>
         <item name="android:paddingTop">10dp</item>
         <item name="android:paddingBottom">10dp</item>
         <item name="android:drawablePadding">8dp</item>
-        <item name="android:layout_marginStart">16dp</item>
-        <item name="android:layout_marginEnd">16dp</item>
-        <item name="android:layout_marginTop">8dp</item>
         <item name="android:background">@drawable/rounded_edittext_bg</item>
         <item name="android:lines">1</item>
         <item name="android:fontFamily">@font/ys_display_regular</item>

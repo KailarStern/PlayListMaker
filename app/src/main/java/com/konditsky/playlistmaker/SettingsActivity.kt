@@ -48,14 +48,15 @@ class SettingsActivity : AppCompatActivity() {
 
 
     private fun sendSupportEmail() {
-        val emailIntent = Intent(Intent.ACTION_SENDTO).apply {
+        Intent(Intent.ACTION_SENDTO).apply {
             data = Uri.parse("mailto:")
             putExtra(Intent.EXTRA_EMAIL, arrayOf("SternKailar@yandex.ru"))
             putExtra(Intent.EXTRA_SUBJECT, getString(R.string.text_to_dv1st))
-            putExtra(Intent.EXTRA_TEXT,getString(R.string.text_to_dv2st))
+            putExtra(Intent.EXTRA_TEXT, getString(R.string.text_to_dv2st))
+            startActivity(this)
         }
-        startActivity(emailIntent)
     }
+
 
     private fun openTermsInBrowser() {
         val termsUrl = getString(R.string.yandexLinkOffer)
@@ -64,9 +65,11 @@ class SettingsActivity : AppCompatActivity() {
         }
         startActivity(termsIntent)
     }
-
-
 }
+
+
+
+
 
 
 

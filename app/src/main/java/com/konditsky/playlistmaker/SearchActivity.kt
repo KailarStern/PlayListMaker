@@ -1,20 +1,23 @@
 package com.konditsky.playlistmaker
 
+import android.content.Context
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.MotionEvent
+import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import android.widget.ImageButton
 
 class SearchActivity : AppCompatActivity() {
 
+    private lateinit var editTextSearch: EditText
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_search)
 
-        val editTextSearch: EditText = findViewById(R.id.editTextSearch)
+        editTextSearch = findViewById<EditText>(R.id.editTextSearch)
         val backButton = findViewById<ImageButton>(R.id.buttonSearchBack)
 
 
@@ -22,16 +25,14 @@ class SearchActivity : AppCompatActivity() {
             finish()
         }
 
+        updateClearIcon()
 
 
         editTextSearch.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(s: Editable?) {
-                if (s?.isNotEmpty() == true) {
-                    editTextSearch.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.clear, 0)
-                } else {
-                    editTextSearch.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0)
-                }
+                updateClearIcon()
             }
+
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
@@ -43,26 +44,41 @@ class SearchActivity : AppCompatActivity() {
                 val drawable = editTextSearch.compoundDrawables[2]
                 if (drawable != null && event.rawX >= (editTextSearch.right - drawable.bounds.width())) {
                     editTextSearch.text.clear()
+                    hideKeyboard()
                     return@setOnTouchListener true
                 }
             }
-            return@setOnTouchListener false
+            false
         }
+    }
+
+    private fun updateClearIcon() {
+        if (editTextSearch.text.isNotEmpty()) {
+            editTextSearch.setCompoundDrawablesWithIntrinsicBounds(R.drawable.button_search, 0, R.drawable.clear, 0)
+        } else {
+            editTextSearch.setCompoundDrawablesWithIntrinsicBounds(R.drawable.button_search, 0, 0, 0)
+        }
+    }
+
+    private fun hideKeyboard(){
+        val inputMethodManager = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        inputMethodManager.hideSoftInputFromWindow(editTextSearch.windowToken,0)
+    }
+
+    companion object {
+        const val SEARCH_QUERY_KEY = "SEARCH_QUERY"
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        val editTextSearch = findViewById<EditText>(R.id.editTextSearch)
-        outState.putString("SEARCH_QUERY", editTextSearch.text.toString())
+        outState.putString(SEARCH_QUERY_KEY, editTextSearch.text.toString())
     }
 
     override fun onRestoreInstanceState(savedInstanceState: Bundle) {
         super.onRestoreInstanceState(savedInstanceState)
-        val editTextSearch = findViewById<EditText>(R.id.editTextSearch)
-        val savedSearchQuery = savedInstanceState.getString("SEARCH_QUERY", "")
+        val savedSearchQuery = savedInstanceState.getString(SEARCH_QUERY_KEY, "")
         editTextSearch.setText(savedSearchQuery)
     }
-
 }
 
 
