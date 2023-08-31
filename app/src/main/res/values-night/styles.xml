@@ -84,8 +84,18 @@
 
     <!--Сёрч активити-->
 
+    <!--Сёрч мьюзик айтем активити-->
+
+
+    <style name="SearchMusicItem">
+        <item name="android:textColor">@color/white</item>
+    </style>
+
+    <style name="SearchMusicItemIcons">
+        <item name="android:tint">@color/white</item>
+        <item name="android:textColor">@color/white</item>
+    </style>
 
 </resources>
-<!-- есть подозрение что найт колорс и стайл тут вообще не нужен, насколько я нашёл инфу можно как то сделать в
-классе апликейшн и просто в колорс изменять цвет автоматом чер ?strr но я так и не понял как это сделать-->
+
 
