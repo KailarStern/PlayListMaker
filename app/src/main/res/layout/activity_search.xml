@@ -1,9 +1,59 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    style="@style/SettingsActivityStyle"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".SearchActivity">
+    tools:context=".SearchActivity"
+    android:orientation="vertical">
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+
+    <LinearLayout
+        android:id="@+id/panelSearchHeader"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:orientation="horizontal">
+        <ImageButton
+            android:id="@+id/buttonSearchBack"
+            style="@style/IconColorStye"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_marginStart="4dp"
+            android:layout_marginTop="4dp"
+            android:layout_marginBottom="4dp"
+            android:layout_gravity="center"
+            android:background="@android:color/transparent"
+            android:contentDescription="@string/search"
+            app:srcCompat="@drawable/arrowleft" />
+        <TextView
+            android:id="@+id/textSearchBack"
+            style="@style/TextBackStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:layout_gravity="center"
+            android:layout_weight="1"
+            android:text="@string/search"
+            android:textSize="@dimen/textSize" />
+    </LinearLayout>
+
+    <EditText
+        android:id="@+id/editTextSearch"
+        style="@style/SearchEditTextStyle"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginTop="8dp"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:hint="@string/search"
+        android:inputType="text"
+        android:drawableStart="@drawable/button_search"
+        android:drawableEnd="@drawable/clear"
+        android:drawablePadding="8dp" />
+
+
+
+
+
+</LinearLayout>

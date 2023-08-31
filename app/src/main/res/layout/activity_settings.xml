@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    style="@style/SettingsActivityStyle"
     android:id="@+id/settings"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/white"
     android:orientation="vertical">
 
 
@@ -15,6 +15,7 @@
         android:orientation="horizontal">
         <ImageButton
             android:id="@+id/buttonSettingsBack"
+            style="@style/IconColorStye"
             android:layout_width="48dp"
             android:layout_height="48dp"
             android:layout_marginStart="4dp"
@@ -24,42 +25,30 @@
             android:background="@android:color/transparent"
             android:contentDescription="@string/description_back_button"
             app:srcCompat="@drawable/arrowleft" />
-
         <TextView
             android:id="@+id/textSettingsBack"
+            style="@style/TextBackStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="12dp"
             android:layout_gravity="center"
             android:layout_weight="1"
             android:text="@string/settings"
-            android:textSize="@dimen/textSize"
-            android:textColor="@color/black" />
+            android:textSize="@dimen/textSize" />
     </LinearLayout>
-
-
 
 
     <FrameLayout
         android:id="@+id/listSettingsTheme"
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/size_61dp"
-        android:layout_marginTop="24dp"
-        android:background="?android:attr/selectableItemBackground"
-        android:clickable="true"
-        android:focusable="true">
-
+        style="@style/SettingsItemFrameLayout"
+        android:layout_marginTop="24dp">
         <TextView
             android:id="@+id/textSettingsTheme"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical|start"
-            android:layout_marginStart="@dimen/size_16dp"
-            android:text="@string/theme"
-            android:textColor="@color/black" />
-
+            style="@style/SettingsItemTextView"
+            android:text="@string/theme" />
         <Switch
             android:id="@+id/switchSettingsTheme"
+            style="@style/CustomSwitchStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical|end"
@@ -67,91 +56,50 @@
     </FrameLayout>
 
 
-
     <FrameLayout
         android:id="@+id/listSettingsShare"
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/size_61dp"
-        android:background="?android:attr/selectableItemBackground"
-        android:clickable="true"
-        android:focusable="true">
-
+        style="@style/SettingsItemFrameLayout">
         <TextView
             android:id="@+id/textSettingsShare"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical|start"
-            android:layout_marginStart="@dimen/size_16dp"
-            android:text="@string/share"
-            android:textColor="@color/black" />
-
+            style="@style/SettingsItemTextView"
+            android:text="@string/share" />
         <ImageView
             android:id="@+id/imageSettingsShare"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical|end"
-            android:layout_marginEnd="@dimen/size_18dp"
+            style="@style/SettingsItemImageView"
             app:srcCompat="@drawable/share" />
     </FrameLayout>
 
 
-
     <FrameLayout
         android:id="@+id/listSettingsSupport"
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/size_61dp"
-        android:background="?android:attr/selectableItemBackground"
-        android:clickable="true"
-        android:focusable="true">
-
+        style="@style/SettingsItemFrameLayout">
         <TextView
             android:id="@+id/textSettingsSupport"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical|start"
-            android:layout_marginStart="@dimen/size_16dp"
-            android:text="@string/support"
-            android:textColor="@color/black" />
-
+            style="@style/SettingsItemTextView"
+            android:text="@string/support" />
         <ImageView
             android:id="@+id/imageSettingsSupport"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical|end"
-            android:layout_marginEnd="@dimen/size_18dp"
+            style="@style/SettingsItemImageView"
             app:srcCompat="@drawable/support" />
     </FrameLayout>
 
 
     <FrameLayout
         android:id="@+id/listSettingsTerms"
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/size_61dp"
-        android:background="?android:attr/selectableItemBackground"
-        android:clickable="true"
-        android:focusable="true">
-
+        style="@style/SettingsItemFrameLayout">
         <TextView
             android:id="@+id/textSettingsTerms"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical|start"
-            android:layout_marginStart="@dimen/size_16dp"
-            android:text="@string/terms"
-            android:textColor="@color/black" />
-
+            style="@style/SettingsItemTextView"
+            android:text="@string/terms" />
         <ImageView
             android:id="@+id/imageSettingsTerms"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical|end"
-            android:layout_marginEnd="@dimen/size_18dp"
+            style="@style/SettingsItemImageView"
             app:srcCompat="@drawable/arrowright" />
     </FrameLayout>
 
 
+
 </LinearLayout>
-<!-- постарался вынести в dimens те значения что встречаются хотя бы 4 раза
-непонятно что имеется в виду когда говорят что должны быть идентичны.
-Возьмём пример с 1ым экраном. "Playlist maker" находится в области которая находится в области.-->
+
+
 
