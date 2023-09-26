@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
+    <!--Для мейн активити-->
         <style name="MainActivityStyle">
             <item name="android:background">@color/blue</item>
         </style>
@@ -18,7 +18,7 @@
             <item name="android:fontFamily">@font/ys_display_medium</item>
             <item name="android:elevation">0dp</item>
         </style>
-<!--Для мейн активити-->
+    <!--сеттингс активити-->
 
     <style name="SettingsActivityStyle">
         <item name="android:background">@color/white</item>
@@ -65,7 +65,7 @@
     <style name="TextBackStyle">
         <item name="android:textColor">@color/YPblack</item>
     </style>
-    <!--сеттингс активити-->
+    <!--Сёрч активити-->
 
 
     <style name="SearchEditTextStyle">
@@ -81,7 +81,15 @@
         <item name="android:fontFamily">@font/ys_display_regular</item>
     </style>
 
-    <!--Сёрч активити-->
+    <!--Сёрч мьюзик айтем активити-->
+
+
+    <style name="SearchMusicItem">
+        <item name="android:textColor">@color/black</item>
+    </style>
+
+    <style name="SearchMusicItemIcons">
+    </style>
 
 
 
