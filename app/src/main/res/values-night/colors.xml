@@ -9,5 +9,6 @@
     <color name="YPBlueLight">#9FBBF3</color>
     <color name="iconSearchActivity">#FF000000</color>
     <color name="textSearchActivity">#FF000000</color>
+    <color name="ColorForRBB">#FFFFFFFF</color>
 
 </resources>
