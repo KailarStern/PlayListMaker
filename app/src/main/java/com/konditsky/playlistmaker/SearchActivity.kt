@@ -1,6 +1,5 @@
 package com.konditsky.playlistmaker
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.content.res.Configuration
 import android.icu.text.SimpleDateFormat
@@ -13,7 +12,6 @@ import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import android.widget.Button
 import android.widget.EditText
-import android.widget.FrameLayout
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.LinearLayout
@@ -21,11 +19,11 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.RecyclerView
 import com.konditsky.playlistmaker.api.ApiClient
+import com.konditsky.playlistmaker.api.ItunesResponse
 import com.konditsky.playlistmaker.api.TrackResponse
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 import java.util.Locale
 
 class SearchActivity : AppCompatActivity() {
@@ -41,7 +39,7 @@ class SearchActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_search)
 
-            // Изображение ошибка сервера, зависящее от темы
+        // Изображение ошибка сервера, зависящее от темы
         val imageServerError = findViewById<ImageView>(R.id.imageServerError)
         if (isDarkTheme()) {
             imageServerError.setImageResource(R.drawable.placeholder_dark_no_internet)
@@ -116,50 +114,65 @@ class SearchActivity : AppCompatActivity() {
         }
     }
 
+
     // Поиск и обрабатка поиска по запросу
     private fun performSearch(query: String) {
+        noResultsPlaceholder.visibility = View.GONE
         serverErrorPlaceholder.visibility = View.GONE
-        CoroutineScope(Dispatchers.IO).launch {
-            try {
-                // Запрос на поиск по трекам
-                val response = ApiClient.instance.search(query)
-                if (response.isSuccessful && response.code() == 200) {
-                    // Преобразует ответ в список треков
-                    val tracks = response.body()?.results?.map { trackResponseToTrack(it) } ?: listOf()
-                    withContext(Dispatchers.Main) {
-                        if (tracks.isEmpty()) {
-                            // Холд если нет результатов
-                            noResultsPlaceholder.visibility = View.VISIBLE
-                            recyclerView.visibility = View.GONE
-                            hideKeyboard()
-                        } else {
-                            // Заполняет и отображает ресайкл результатами поиска
-                            noResultsPlaceholder.visibility = View.GONE
-                            recyclerView.visibility = View.VISIBLE
-                            adapter = TrackAdapter(ArrayList(tracks))
-                            recyclerView.adapter = adapter
-                        }
-                    }
-                } else {
-                    withContext(Dispatchers.Main) {
-                        // Показывает ошибку если нет инета
-                        Toast.makeText(this@SearchActivity, "Ошибка при поиске", Toast.LENGTH_SHORT).show()
-                        serverErrorPlaceholder.visibility = View.VISIBLE
+        //  Поиск через ретрофит
+        ApiClient.instance.search(query).enqueue(object : Callback<ItunesResponse> {
+            override fun onResponse(
+                call: Call<ItunesResponse>,
+                response: Response<ItunesResponse>
+            ) {
+                if (response.isSuccessful) {
+                    // Если ответ успешный, обрабатываем данные.
+                    val tracks =
+                        response.body()?.results?.map { trackResponseToTrack(it) } ?: listOf()
+                    if (tracks.isEmpty()) {
+                        // Если нет результатов, то полейсхолд.
+                        noResultsPlaceholder.visibility = View.VISIBLE
                         recyclerView.visibility = View.GONE
-                        hideKeyboard()
+                    } else {
+                        // Или даём результаты ресайкла
+                        noResultsPlaceholder.visibility = View.GONE
+                        recyclerView.visibility = View.VISIBLE
+                        adapter = TrackAdapter(ArrayList(tracks))
+                        recyclerView.adapter = adapter
                     }
-                }
-            } catch (e: Exception) {
-                withContext(Dispatchers.Main) {
-                    // Показывает ошибку если нет результата
-                    Toast.makeText(this@SearchActivity, "Произошла ошибка: ${e.message}", Toast.LENGTH_SHORT).show()
+                    hideKeyboard()
+                } else {
+                    // Если ответ неуспешный плейсхолд
                     serverErrorPlaceholder.visibility = View.VISIBLE
                     recyclerView.visibility = View.GONE
                     hideKeyboard()
+                    Toast.makeText(
+                        this@SearchActivity,
+                        "Ошибка при поиске",
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
             }
-        }
+
+
+
+            override fun onFailure(call: Call<ItunesResponse>, t: Throwable) {
+                // Если запрос не выполнен, показываем плейсхо
+                noResultsPlaceholder.visibility = View.GONE // скрыть плейсхолдер "нет результатов" при ошибке
+                serverErrorPlaceholder.visibility = View.VISIBLE // показать плейсхолдер "ошибка сервера"
+                recyclerView.visibility = View.GONE // скрыть ресайкл
+                    // hideKeyboard() //это строка типа лишняя
+                Toast.makeText(
+                    this@SearchActivity,
+                    "Произошла ошибка: ${t.message}",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        })
     }
+
+
+
 
     // Конвертирует ответ Айпиай в Трак, показывает время
     private fun trackResponseToTrack(trackResponse: TrackResponse): Track {
