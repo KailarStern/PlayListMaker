@@ -1,66 +1,137 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    style="@style/SettingsActivityStyle"
-    xmlns:tools="http://schemas.android.com/tools"
+xmlns:app="http://schemas.android.com/apk/res-auto"
+style="@style/SettingsActivityStyle"
+xmlns:tools="http://schemas.android.com/tools"
+android:layout_width="match_parent"
+android:layout_height="match_parent"
+tools:context=".SearchActivity"
+android:orientation="vertical">
+
+
+<LinearLayout
+    android:id="@+id/panelSearchHeader"
+    android:layout_width="match_parent"
+    android:layout_height="56dp"
+    android:orientation="horizontal">
+    <ImageButton
+        android:id="@+id/buttonSearchBack"
+        style="@style/IconColorStye"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginStart="4dp"
+        android:layout_marginTop="4dp"
+        android:layout_marginBottom="4dp"
+        android:layout_gravity="center"
+        android:background="@android:color/transparent"
+        android:contentDescription="@string/search"
+        app:srcCompat="@drawable/arrowleft" />
+    <TextView
+        android:id="@+id/textSearchBack"
+        style="@style/TextBackStyle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="12dp"
+        android:layout_gravity="center"
+        android:layout_weight="1"
+        android:text="@string/search"
+        android:textSize="@dimen/textSize" />
+</LinearLayout>
+
+<EditText
+    android:id="@+id/editTextSearch"
+    style="@style/SearchEditTextStyle"
+    android:layout_marginStart="16dp"
+    android:layout_marginEnd="16dp"
+    android:layout_marginTop="8dp"
+    android:layout_width="match_parent"
+    android:layout_height="48dp"
+    android:hint="@string/search"
+    android:inputType="text"
+    android:drawableStart="@drawable/button_search"
+    android:drawableEnd="@drawable/clear"
+    android:drawablePadding="8dp"
+    android:imeOptions="actionDone"
+    android:singleLine="true"/>
+
+<androidx.recyclerview.widget.RecyclerView
+    android:id="@+id/recyclerViewSearchResults"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".SearchActivity"
-    android:orientation="vertical">
+    android:layout_marginTop="16dp"
+    android:orientation="vertical"
+    app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+    tools:itemCount="5"/>
 
 
     <LinearLayout
-        android:id="@+id/panelSearchHeader"
+        android:id="@+id/noResultsPlaceholder"
         android:layout_width="match_parent"
-        android:layout_height="56dp"
-        android:orientation="horizontal">
-        <ImageButton
-            android:id="@+id/buttonSearchBack"
-            style="@style/IconColorStye"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:layout_marginStart="4dp"
-            android:layout_marginTop="4dp"
-            android:layout_marginBottom="4dp"
-            android:layout_gravity="center"
-            android:background="@android:color/transparent"
-            android:contentDescription="@string/search"
-            app:srcCompat="@drawable/arrowleft" />
+        android:layout_height="wrap_content"
+        android:layout_marginTop="160dp"
+        android:visibility="gone"
+        android:orientation="vertical"
+        android:gravity="center_horizontal">
+
+        <ImageView
+            android:id="@+id/imageNoResults"
+            android:layout_width="120dp"
+            android:layout_height="120dp"
+            android:src="@drawable/placeholder_light_no_results" />
+
         <TextView
-            android:id="@+id/textSearchBack"
-            style="@style/TextBackStyle"
+            android:id="@+id/textNoResults"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="12dp"
-            android:layout_gravity="center"
-            android:layout_weight="1"
-            android:text="@string/search"
-            android:textSize="@dimen/textSize" />
+            android:layout_marginTop="16dp"
+            android:text="@string/ResultsPlaceholder"
+            style="@style/ErrorsTextStyle" />
     </LinearLayout>
 
-    <EditText
-        android:id="@+id/editTextSearch"
-        style="@style/SearchEditTextStyle"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginTop="8dp"
-        android:layout_width="match_parent"
-        android:layout_height="48dp"
-        android:hint="@string/search"
-        android:inputType="text"
-        android:drawableStart="@drawable/button_search"
-        android:drawableEnd="@drawable/clear"
-        android:drawablePadding="8dp" />
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recyclerViewSearchResults"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginTop="16dp"
-        android:orientation="vertical"
-        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-        tools:itemCount="5"/>
 
+    <LinearLayout
+        android:id="@+id/serverErrorPlaceholder"
+        android:layout_marginTop="160dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:orientation="vertical">
+
+        <ImageView
+            android:id="@+id/imageServerError"
+            android:layout_width="120dp"
+            android:layout_height="120dp"
+            android:layout_gravity="center"
+            android:src="@drawable/placeholder_light_no_internet" />
+
+        <TextView
+            android:id="@+id/textServerError"
+            style="@style/ErrorsTextStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:text="@string/server_error_text"/>
+
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/buttonRetry"
+            style="@style/RoundedButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:layout_gravity="center"
+            android:text="@string/retry"
+            android:backgroundTint="@color/ColorForRBB"
+            app:cornerRadius="24dp" />
+
+
+
+
+
+    </LinearLayout>
 
 
 
