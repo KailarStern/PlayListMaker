@@ -1,11 +1,14 @@
 package com.konditsky.playlistmaker
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.res.Configuration
 import android.icu.text.SimpleDateFormat
+import android.net.ConnectivityManager
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 import android.view.inputmethod.EditorInfo
@@ -15,6 +18,7 @@ import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.LinearLayout
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.RecyclerView
@@ -24,6 +28,7 @@ import com.konditsky.playlistmaker.api.TrackResponse
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import java.util.Date
 import java.util.Locale
 
 class SearchActivity : AppCompatActivity() {
@@ -33,140 +38,216 @@ class SearchActivity : AppCompatActivity() {
     private lateinit var adapter: TrackAdapter
     private lateinit var noResultsPlaceholder: LinearLayout
     private lateinit var serverErrorPlaceholder: LinearLayout
+    private lateinit var trackHistoryManager: SearchHistoryManager
+    private lateinit var youSearchedView: TextView
+    private lateinit var clearHistoryButton: Button
+    companion object {
+        const val SEARCH_QUERY_KEY = "SEARCH_QUERY"
+        private const val PREFS_NAME = "com.konditsky.playlistmaker.prefs"
+        private const val SEARCH_QUERY = "search_query"
+    }
 
-    //начало активности
+
+    @SuppressLint("ClickableViewAccessibility")
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_search)
 
-        // Изображение ошибка сервера, зависящее от темы
-        val imageServerError = findViewById<ImageView>(R.id.imageServerError)
-        if (isDarkTheme()) {
-            imageServerError.setImageResource(R.drawable.placeholder_dark_no_internet)
-        } else {
-            imageServerError.setImageResource(R.drawable.placeholder_light_no_internet)
+
+        trackHistoryManager = SearchHistoryManager(getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE))
+        adapter = TrackAdapter(ArrayList())
+        recyclerView = findViewById(R.id.recyclerViewSearchResults)
+        recyclerView.adapter = adapter
+
+
+        val history = trackHistoryManager.getTrackHistory()
+        if (history.isNotEmpty()) {
+            adapter.updateTracks(ArrayList(history))
         }
 
-        // Изображение ошибка поиска, зависящее от темы
+
+        editTextSearch = findViewById(R.id.editTextSearch)
+        val backButton = findViewById<ImageButton>(R.id.buttonSearchBack)
+        noResultsPlaceholder = findViewById(R.id.noResultsPlaceholder)
+        serverErrorPlaceholder = findViewById(R.id.serverErrorPlaceholder)
+        youSearchedView = findViewById(R.id.textViewSearchHistoryLabel)
+        clearHistoryButton = findViewById(R.id.buttonClearSearchHistory)
+
+
+        val imageServerError = findViewById<ImageView>(R.id.imageServerError)
         val imageNoResults = findViewById<ImageView>(R.id.imageNoResults)
         if (isDarkTheme()) {
+            imageServerError.setImageResource(R.drawable.placeholder_dark_no_internet)
             imageNoResults.setImageResource(R.drawable.placeholder_dark_no_results)
         } else {
+            imageServerError.setImageResource(R.drawable.placeholder_light_no_internet)
             imageNoResults.setImageResource(R.drawable.placeholder_light_no_results)
         }
 
+        setupUIBehavior()
 
-        editTextSearch = findViewById(R.id.editTextSearch) // иниц-ия поле поиска
-        val backButton = findViewById<ImageButton>(R.id.buttonSearchBack) // иниц-ия кнопка назад
-        recyclerView = findViewById(R.id.recyclerViewSearchResults) // иниц-ия ресайкла
-        noResultsPlaceholder = findViewById(R.id.noResultsPlaceholder) // иниц-ия холд поиск
-        serverErrorPlaceholder = findViewById(R.id.serverErrorPlaceholder) // иниц-ия холд сервер
+        val lastQuery = loadSearchQuery()
+        if (lastQuery.isNotEmpty()) {
+            editTextSearch.setText(lastQuery)
+        }
+    }
 
-        // иниц-ия кнопки повтора и установка слушателя
+    private fun setupUIBehavior() {
         val retryButton = findViewById<Button>(R.id.buttonRetry)
         retryButton.setOnClickListener {
             performSearch(editTextSearch.text.toString())
         }
 
-        // слушатель для кнопки назад,для завершения активности
+        val backButton = findViewById<ImageButton>(R.id.buttonSearchBack)
         backButton.setOnClickListener {
             finish()
         }
 
-        updateClearIcon() // Обновляет иконку очистки в поиске
-
-        // Обновляет иконку очистки после изменения текста
         editTextSearch.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(s: Editable?) {
                 updateClearIcon()
             }
 
-            // До изменения текста
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-
-            // При изменении текста делает поиск
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                performSearch(s.toString())
-            }
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
         })
 
-        // Очищает текст и скрывает клавиатуру если нажать крестик
+
+        editTextSearch.setOnEditorActionListener { _, actionId, _ ->
+            if (actionId == EditorInfo.IME_ACTION_DONE) {
+                if (editTextSearch.text.toString().isEmpty()) {
+                    hideKeyboard()
+                    updateSearchHistoryDisplay()
+                } else {
+                    performSearch(editTextSearch.text.toString())
+                }
+                true
+            } else {
+                false
+            }
+        }
+
+
+        val lastQuery = loadSearchQuery()
+        if (lastQuery.isNotEmpty()) {
+            editTextSearch.setText(lastQuery)
+            performSearch(lastQuery)
+        }
+
+        adapter.setOnItemClickListener { track ->
+            trackHistoryManager.addTrackToHistory(track)
+            updateSearchHistoryDisplay()
+        }
+
+        editTextSearch.setOnFocusChangeListener { _, hasFocus ->
+            if (hasFocus && editTextSearch.text.isEmpty()) {
+                updateSearchHistoryDisplay()
+            } else {
+                recyclerView.visibility = View.GONE
+            }
+        }
+
+        clearHistoryButton.setOnClickListener {
+            trackHistoryManager.clearTrackHistory()
+            updateSearchHistoryDisplay()
+        }
         editTextSearch.setOnTouchListener { v, event ->
             if (event.action == MotionEvent.ACTION_UP) {
-                val drawable = editTextSearch.compoundDrawables[2]
+                val drawableRight = 2
+                val drawable = editTextSearch.compoundDrawables[drawableRight]
                 if (drawable != null && event.rawX >= (editTextSearch.right - drawable.bounds.width())) {
                     editTextSearch.text.clear()
                     hideKeyboard()
+                    updateSearchHistoryDisplay()
                     return@setOnTouchListener true
                 }
             }
             false
         }
 
-        // Выполняется поиск если нажать на галочку на клаве
-        editTextSearch.setOnEditorActionListener { _, actionId, _ ->
-            if (actionId == EditorInfo.IME_ACTION_DONE) {
-                performSearch(editTextSearch.text.toString())
-                true
-            } else {
-                false
-            }
+    }
+
+    private fun updateVisibilityBasedOnText(text: String) {
+        if (text.isNotEmpty()) {
+            youSearchedView.visibility = View.GONE
+            clearHistoryButton.visibility = View.GONE
+            recyclerView.visibility = View.GONE
+        } else {
+            youSearchedView.visibility = View.VISIBLE
+            clearHistoryButton.visibility = View.VISIBLE
+            updateSearchHistoryDisplay()
         }
     }
 
-
-    // Поиск и обрабатка поиска по запросу
-    private fun performSearch(query: String) {
+    private fun updateSearchHistoryDisplay() {
+        val history = trackHistoryManager.getTrackHistory()
+        if (history.isNotEmpty()) {
+            adapter.updateTracks(ArrayList(history))
+            recyclerView.visibility = View.VISIBLE
+            youSearchedView.visibility = View.VISIBLE
+            clearHistoryButton.visibility = View.VISIBLE
+        } else {
+            recyclerView.visibility = View.GONE
+            youSearchedView.visibility = View.GONE
+            clearHistoryButton.visibility = View.GONE
+        }
         noResultsPlaceholder.visibility = View.GONE
         serverErrorPlaceholder.visibility = View.GONE
-        //  Поиск через ретрофит
+    }
+
+
+    private fun isInternetAvailable(): Boolean {
+        val connectivityManager = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val activeNetwork = connectivityManager.activeNetworkInfo
+        return activeNetwork != null && activeNetwork.isConnected
+    }
+
+
+
+    private fun performSearch(query: String) {
+        if (query.isEmpty()) {
+            updateSearchHistoryDisplay()
+            return
+        }
+
+        youSearchedView.visibility = View.GONE
+        clearHistoryButton.visibility = View.GONE
+
+        saveSearchQuery(query)
+        hideKeyboard()
+
+        if (!isInternetAvailable()) {
+            serverErrorPlaceholder.visibility = View.VISIBLE
+            noResultsPlaceholder.visibility = View.GONE
+            recyclerView.visibility = View.GONE
+            return
+        }
+
         ApiClient.instance.search(query).enqueue(object : Callback<ItunesResponse> {
-            override fun onResponse(
-                call: Call<ItunesResponse>,
-                response: Response<ItunesResponse>
-            ) {
+            override fun onResponse(call: Call<ItunesResponse>, response: Response<ItunesResponse>) {
                 if (response.isSuccessful) {
-                    // Если ответ успешный, обрабатываем данные.
-                    val tracks =
-                        response.body()?.results?.map { trackResponseToTrack(it) } ?: listOf()
+                    val tracks = response.body()?.results?.map { trackResponseToTrack(it) } ?: listOf()
                     if (tracks.isEmpty()) {
-                        // Если нет результатов, то полейсхолд.
                         noResultsPlaceholder.visibility = View.VISIBLE
+                        serverErrorPlaceholder.visibility = View.GONE
                         recyclerView.visibility = View.GONE
                     } else {
-                        // Или даём результаты ресайкла
-                        noResultsPlaceholder.visibility = View.GONE
+                        adapter.updateTracks(ArrayList(tracks))
                         recyclerView.visibility = View.VISIBLE
-                        adapter = TrackAdapter(ArrayList(tracks))
-                        recyclerView.adapter = adapter
+                        noResultsPlaceholder.visibility = View.GONE
+                        serverErrorPlaceholder.visibility = View.GONE
                     }
-                    hideKeyboard()
                 } else {
-                    // Если ответ неуспешный плейсхолд
-                    serverErrorPlaceholder.visibility = View.VISIBLE
-                    recyclerView.visibility = View.GONE
-                    hideKeyboard()
-                    Toast.makeText(
-                        this@SearchActivity,
-                        "Ошибка при поиске",
-                        Toast.LENGTH_SHORT
-                    ).show()
+                    Toast.makeText(this@SearchActivity, "Ошибка при поиске", Toast.LENGTH_SHORT).show()
                 }
             }
-
-
-
             override fun onFailure(call: Call<ItunesResponse>, t: Throwable) {
-                // Если запрос не выполнен, показываем плейсхо
-                noResultsPlaceholder.visibility = View.GONE // скрыть плейсхолдер "нет результатов" при ошибке
-                serverErrorPlaceholder.visibility = View.VISIBLE // показать плейсхолдер "ошибка сервера"
-                recyclerView.visibility = View.GONE // скрыть ресайкл
-                    // hideKeyboard() //это строка типа лишняя
-                Toast.makeText(
-                    this@SearchActivity,
-                    "Произошла ошибка: ${t.message}",
-                    Toast.LENGTH_SHORT
-                ).show()
+                // Ошибка сети
+                serverErrorPlaceholder.visibility = View.VISIBLE
+                noResultsPlaceholder.visibility = View.GONE
+                recyclerView.visibility = View.GONE
+                Toast.makeText(this@SearchActivity, "Произошла ошибка: ${t.message}", Toast.LENGTH_SHORT).show()
             }
         })
     }
@@ -174,13 +255,18 @@ class SearchActivity : AppCompatActivity() {
 
 
 
-    // Конвертирует ответ Айпиай в Трак, показывает время
     private fun trackResponseToTrack(trackResponse: TrackResponse): Track {
-        val time = SimpleDateFormat("mm:ss", Locale.getDefault()).format(trackResponse.trackTimeMillis)
-        return Track(trackResponse.trackName, trackResponse.artistName, time, trackResponse.artworkUrl100)
+        val timeMillis = Date(trackResponse.trackTimeMillis)
+        val time = SimpleDateFormat("mm:ss", Locale.getDefault()).format(timeMillis)
+        return Track(
+            trackId = 0L,
+            trackName = trackResponse.trackName,
+            artistName = trackResponse.artistName,
+            trackTime = time,
+            artworkUrl100 = trackResponse.artworkUrl100
+        )
     }
 
-    // Отображение иконки очистки если есть текст
     private fun updateClearIcon() {
         if (editTextSearch.text.isNotEmpty()) {
             editTextSearch.setCompoundDrawablesWithIntrinsicBounds(R.drawable.button_search, 0, R.drawable.clear, 0)
@@ -189,36 +275,46 @@ class SearchActivity : AppCompatActivity() {
         }
     }
 
-    // Скрывает клаву
     private fun hideKeyboard() {
         val inputMethodManager = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
         inputMethodManager.hideSoftInputFromWindow(editTextSearch.windowToken,0)
     }
 
-    // Ключ для запроса
-    companion object {
-        const val SEARCH_QUERY_KEY = "SEARCH_QUERY"
+    private fun saveSearchQuery(query: String) {
+        val prefs = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE).edit()
+        if (query.isEmpty()) {
+            prefs.remove(SEARCH_QUERY)
+        } else {
+            prefs.putString(SEARCH_QUERY, query)
+        }
+        prefs.apply()
     }
 
-    // // Сохраняет текст поиска перед закрытием приложения
+
+    private fun loadSearchQuery(): String {
+        return getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+            .getString(SEARCH_QUERY, "") ?: ""
+    }
+
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
         outState.putString(SEARCH_QUERY_KEY, editTextSearch.text.toString())
     }
 
-    // Восстанавливает текст при перезапуске приложения
+
     override fun onRestoreInstanceState(savedInstanceState: Bundle) {
         super.onRestoreInstanceState(savedInstanceState)
-        val savedSearchQuery = savedInstanceState.getString(SEARCH_QUERY_KEY, "")
-        editTextSearch.setText(savedSearchQuery)
+        val savedSearchQuery = savedInstanceState.getString(SEARCH_QUERY_KEY) ?: ""
+        if (savedSearchQuery.isNotEmpty()) {
+            editTextSearch.setText(savedSearchQuery)
+            performSearch(savedSearchQuery)
+        }
     }
 
-    // выбирает тему
     private fun isDarkTheme(): Boolean {
         return resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES
     }
 }
-
 
 
 
