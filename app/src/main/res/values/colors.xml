@@ -11,4 +11,10 @@
     <color name="iconSearchActivity">#AEAFB4</color>
     <color name="textSearchActivity">#FF000000</color>
     <color name="ColorForRBB">#FF000000</color>
+
+    <!-- Сёрч Активити -->
+    <color name="ColorForTextViewSearchHistoryLabel">#FF000000</color>
+    <color name="ColorForButtonClearSearchHistoryText">#FFFFFFFF</color>
+    <color name="ColorForButtonClearSearchHistoryBackground">#FF000000</color>
+
 </resources>

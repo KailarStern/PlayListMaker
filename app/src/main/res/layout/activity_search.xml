@@ -63,7 +63,7 @@ android:orientation="vertical">
         android:layout_marginStart="16dp"
         android:text="Вы искали"
         android:textSize="@dimen/size_16dp"
-        android:textColor="@color/black"
+        android:textColor="@color/ColorForTextViewSearchHistoryLabel"
         android:fontFamily="@font/ys_display_medium"
     />
 
@@ -153,8 +153,8 @@ android:orientation="vertical">
         android:layout_marginStart="16dp"
         android:text="Очистить историю"
         android:textSize="12sp"
-        android:textColor="@android:color/white"
-        android:backgroundTint="@android:color/black"
+        android:textColor="@color/ColorForButtonClearSearchHistoryText"
+        android:backgroundTint="@color/ColorForButtonClearSearchHistoryBackground"
         app:cornerRadius="16dp"
         android:fontFamily="@font/ys_display_medium"/>
 

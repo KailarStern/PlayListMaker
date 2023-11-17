@@ -21,6 +21,7 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.recyclerview.widget.RecyclerView
 import com.konditsky.playlistmaker.api.ApiClient
 import com.konditsky.playlistmaker.api.ItunesResponse
@@ -75,6 +76,19 @@ class SearchActivity : AppCompatActivity() {
         clearHistoryButton = findViewById(R.id.buttonClearSearchHistory)
 
 
+        backButton.setOnClickListener {
+            finish()
+        }
+
+
+        val lastSearchQuery = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+            .getString(SEARCH_QUERY, "")
+        if (!lastSearchQuery.isNullOrEmpty()) {
+            editTextSearch.setText(lastSearchQuery)
+            performSearch(lastSearchQuery)
+        }
+
+
         val imageServerError = findViewById<ImageView>(R.id.imageServerError)
         val imageNoResults = findViewById<ImageView>(R.id.imageNoResults)
         if (isDarkTheme()) {
@@ -86,12 +100,10 @@ class SearchActivity : AppCompatActivity() {
         }
 
         setupUIBehavior()
-
-        val lastQuery = loadSearchQuery()
-        if (lastQuery.isNotEmpty()) {
-            editTextSearch.setText(lastQuery)
-        }
+        updateSearchHistoryDisplay()
     }
+
+
 
     private fun setupUIBehavior() {
         val retryButton = findViewById<Button>(R.id.buttonRetry)
@@ -129,12 +141,6 @@ class SearchActivity : AppCompatActivity() {
         }
 
 
-        val lastQuery = loadSearchQuery()
-        if (lastQuery.isNotEmpty()) {
-            editTextSearch.setText(lastQuery)
-            performSearch(lastQuery)
-        }
-
         adapter.setOnItemClickListener { track ->
             trackHistoryManager.addTrackToHistory(track)
             updateSearchHistoryDisplay()
@@ -158,6 +164,7 @@ class SearchActivity : AppCompatActivity() {
                 val drawable = editTextSearch.compoundDrawables[drawableRight]
                 if (drawable != null && event.rawX >= (editTextSearch.right - drawable.bounds.width())) {
                     editTextSearch.text.clear()
+                    clearSearchQueryInPreferences()
                     hideKeyboard()
                     updateSearchHistoryDisplay()
                     return@setOnTouchListener true
@@ -166,34 +173,31 @@ class SearchActivity : AppCompatActivity() {
             false
         }
 
+
     }
 
-    private fun updateVisibilityBasedOnText(text: String) {
-        if (text.isNotEmpty()) {
-            youSearchedView.visibility = View.GONE
-            clearHistoryButton.visibility = View.GONE
-            recyclerView.visibility = View.GONE
-        } else {
-            youSearchedView.visibility = View.VISIBLE
-            clearHistoryButton.visibility = View.VISIBLE
-            updateSearchHistoryDisplay()
-        }
-    }
 
     private fun updateSearchHistoryDisplay() {
         val history = trackHistoryManager.getTrackHistory()
-        if (history.isNotEmpty()) {
+        Log.d("SearchHistoryDisplay", "Updating search history display. History size: ${history.size}")
+
+        if (history.isEmpty()) {
+            Log.d("SearchHistoryDisplay", "History is empty. Hiding search history UI elements.")
+            recyclerView.visibility = View.GONE
+            youSearchedView.visibility = View.GONE
+            clearHistoryButton.visibility = View.GONE
+        } else {
+            Log.d("SearchHistoryDisplay", "History is not empty. Showing search history UI elements.")
             adapter.updateTracks(ArrayList(history))
             recyclerView.visibility = View.VISIBLE
             youSearchedView.visibility = View.VISIBLE
             clearHistoryButton.visibility = View.VISIBLE
-        } else {
-            recyclerView.visibility = View.GONE
-            youSearchedView.visibility = View.GONE
-            clearHistoryButton.visibility = View.GONE
         }
         noResultsPlaceholder.visibility = View.GONE
         serverErrorPlaceholder.visibility = View.GONE
+
+        Log.d("SearchHistoryDisplay", "youSearchedView visibility: ${youSearchedView.visibility}")
+        Log.d("SearchHistoryDisplay", "clearHistoryButton visibility: ${clearHistoryButton.visibility}")
     }
 
 
@@ -211,10 +215,11 @@ class SearchActivity : AppCompatActivity() {
             return
         }
 
+        saveSearchQuery(query)
+
         youSearchedView.visibility = View.GONE
         clearHistoryButton.visibility = View.GONE
 
-        saveSearchQuery(query)
         hideKeyboard()
 
         if (!isInternetAvailable()) {
@@ -243,7 +248,6 @@ class SearchActivity : AppCompatActivity() {
                 }
             }
             override fun onFailure(call: Call<ItunesResponse>, t: Throwable) {
-                // Ошибка сети
                 serverErrorPlaceholder.visibility = View.VISIBLE
                 noResultsPlaceholder.visibility = View.GONE
                 recyclerView.visibility = View.GONE
@@ -251,8 +255,6 @@ class SearchActivity : AppCompatActivity() {
             }
         })
     }
-
-
 
 
     private fun trackResponseToTrack(trackResponse: TrackResponse): Track {
@@ -290,10 +292,10 @@ class SearchActivity : AppCompatActivity() {
         prefs.apply()
     }
 
-
-    private fun loadSearchQuery(): String {
-        return getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-            .getString(SEARCH_QUERY, "") ?: ""
+    private fun clearSearchQueryInPreferences() {
+        val prefs = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE).edit()
+        prefs.remove(SEARCH_QUERY)
+        prefs.apply()
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -314,6 +316,8 @@ class SearchActivity : AppCompatActivity() {
     private fun isDarkTheme(): Boolean {
         return resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES
     }
+
+
 }
 
 
