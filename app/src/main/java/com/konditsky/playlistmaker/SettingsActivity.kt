@@ -1,5 +1,6 @@
 package com.konditsky.playlistmaker
 
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
@@ -7,8 +8,15 @@ import android.os.Bundle
 import android.widget.Button
 import android.widget.ImageButton
 import android.widget.ImageView
+import android.widget.Switch
+import androidx.appcompat.app.AppCompatDelegate
 
 class SettingsActivity : AppCompatActivity() {
+
+    companion object {
+        private const val THEME_PREF = "com.konditsky.playlistmaker.prefs"
+        private const val DARK_THEME = "DARK_THEME"
+    }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_settings)
@@ -17,6 +25,9 @@ class SettingsActivity : AppCompatActivity() {
         val shareImageView = findViewById<ImageView>(R.id.imageSettingsShare)
         val supportImageView = findViewById<ImageView>(R.id.imageSettingsSupport)
         val termsImageView = findViewById<ImageView>(R.id.imageSettingsTerms)
+        val themeSwitch = findViewById<Switch>(R.id.switchSettingsTheme)
+
+        themeSwitch.isChecked = loadThemeSetting()
 
         backButton.setOnClickListener {
             finish()
@@ -34,6 +45,16 @@ class SettingsActivity : AppCompatActivity() {
             openTermsInBrowser()
         }
 
+        themeSwitch.setOnCheckedChangeListener { _, isChecked ->
+            saveThemeSetting(isChecked)
+            AppCompatDelegate.setDefaultNightMode(
+                if (isChecked) AppCompatDelegate.MODE_NIGHT_YES else AppCompatDelegate.MODE_NIGHT_NO
+            )
+        }
+
+
+
+
     }
 
 
@@ -46,7 +67,6 @@ class SettingsActivity : AppCompatActivity() {
         startActivity(shareIntent)
     }
 
-
     private fun sendSupportEmail() {
         Intent(Intent.ACTION_SENDTO).apply {
             data = Uri.parse("mailto:")
@@ -57,7 +77,6 @@ class SettingsActivity : AppCompatActivity() {
         }
     }
 
-
     private fun openTermsInBrowser() {
         val termsUrl = getString(R.string.yandexLinkOffer)
         val termsIntent = Intent(Intent.ACTION_VIEW).apply {
@@ -65,6 +84,18 @@ class SettingsActivity : AppCompatActivity() {
         }
         startActivity(termsIntent)
     }
+
+    private fun saveThemeSetting(isDarkTheme: Boolean) {
+        val prefs = getSharedPreferences(THEME_PREF, Context.MODE_PRIVATE).edit()
+        prefs.putBoolean(DARK_THEME, isDarkTheme)
+        prefs.apply()
+    }
+
+    private fun loadThemeSetting(): Boolean {
+        val prefs = getSharedPreferences(THEME_PREF, Context.MODE_PRIVATE)
+        return prefs.getBoolean(DARK_THEME, false)
+    }
+
 }
 
 
