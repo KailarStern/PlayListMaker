@@ -265,9 +265,14 @@ class SearchActivity : AppCompatActivity() {
             trackName = trackResponse.trackName,
             artistName = trackResponse.artistName,
             trackTime = time,
-            artworkUrl100 = trackResponse.artworkUrl100
+            artworkUrl100 = trackResponse.artworkUrl100,
+            collectionName = trackResponse.collectionName,
+            releaseDate = trackResponse.releaseDate,
+            primaryGenreName = trackResponse.primaryGenreName,
+            country = trackResponse.country
         )
     }
+
 
     private fun updateClearIcon() {
         if (editTextSearch.text.isNotEmpty()) {

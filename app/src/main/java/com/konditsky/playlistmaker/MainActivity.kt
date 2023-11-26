@@ -10,13 +10,9 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatDelegate
 
 class MainActivity : AppCompatActivity() {
-    companion object {
-        private const val THEME_PREF = "com.konditsky.playlistmaker.prefs"
-        private const val DARK_THEME = "DARK_THEME"
-    }
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        loadThemeSetting()
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
@@ -40,11 +36,4 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun loadThemeSetting() {
-        val prefs = getSharedPreferences(THEME_PREF, Context.MODE_PRIVATE)
-        val isDarkTheme = prefs.getBoolean(DARK_THEME, false)
-        AppCompatDelegate.setDefaultNightMode(
-            if (isDarkTheme) AppCompatDelegate.MODE_NIGHT_YES else AppCompatDelegate.MODE_NIGHT_NO
-        )
-    }
 }

@@ -1,5 +1,6 @@
 package com.konditsky.playlistmaker
 
+import android.content.Intent
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
@@ -20,11 +21,13 @@ class TrackAdapter(private var trackList: ArrayList<Track>) : RecyclerView.Adapt
         val track = trackList[position]
         holder.bind(track)
         holder.itemView.setOnClickListener {
-            onItemClickListener?.invoke(track)
+
+            val intent = Intent(holder.itemView.context, AudioPlayerActivity::class.java)
+            intent.putExtra("TRACK_DATA", track)
+            holder.itemView.context.startActivity(intent)
         }
-
-
     }
+
 
     override fun getItemCount() = trackList.size
 

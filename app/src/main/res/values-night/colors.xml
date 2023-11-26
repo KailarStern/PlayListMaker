@@ -16,4 +16,10 @@
     <color name="ColorForButtonClearSearchHistoryText">#1A1B22</color>
     <color name="ColorForButtonClearSearchHistoryBackground">#FFFFFFFF</color>
 
+    <!--АудиоПлеер-->
+    <color name="AudioPlayerBackIcon">#FFFFFF</color>
+    <color name="AudioPlayerText">#FFFFFF</color>
+    <color name="AudioPlayerIcons">#FFFFFF</color>
+    <color name="AudioPlayerIconPlay">#FFFFFF</color>
+
 </resources>
