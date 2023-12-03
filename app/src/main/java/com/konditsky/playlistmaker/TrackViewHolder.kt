@@ -22,7 +22,7 @@ class TrackViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         Glide.with(albumImageView.context)
             .load(track.artworkUrl100)
             .apply(RequestOptions().transform(CenterCrop(), RoundedCorners(8)))
-            .placeholder(R.drawable.ic_mock)
+            .placeholder(R.drawable.ic_mock_task)
             .into(albumImageView)
     }
 }

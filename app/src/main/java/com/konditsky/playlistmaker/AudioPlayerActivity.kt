@@ -5,6 +5,8 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.bumptech.glide.Glide
+import com.bumptech.glide.load.resource.bitmap.RoundedCorners
+
 
 class AudioPlayerActivity : AppCompatActivity() {
 
@@ -14,10 +16,11 @@ class AudioPlayerActivity : AppCompatActivity() {
 
         val track = intent.getSerializableExtra("TRACK_DATA") as? Track
 
-        val backButton = findViewById<ImageView>(R.id.backIcon)
-        backButton.setOnClickListener {
+        val toolbar = findViewById<androidx.appcompat.widget.Toolbar>(R.id.toolbar)
+        toolbar.setNavigationOnClickListener {
             onBackPressed()
         }
+
 
         track?.let {
             findViewById<TextView>(R.id.trackName).text = it.trackName
@@ -28,8 +31,17 @@ class AudioPlayerActivity : AppCompatActivity() {
             findViewById<TextView>(R.id.country).text = it.country
 
             val albumCoverImageView = findViewById<ImageView>(R.id.albumCover)
+            val radiusDp = 8
+            val density = resources.displayMetrics.density
+            val radiusPx = (radiusDp * density).toInt()
+
+            val artworkUrl = it.getHighQualityArtworkUrl()
+            val placeholderResId = R.drawable.ic_mock_task
+
             Glide.with(this)
-                .load(it.getHighQualityArtworkUrl())
+                .load(artworkUrl)
+                .error(Glide.with(this).load(placeholderResId))
+                .transform(RoundedCorners(radiusPx))
                 .into(albumCoverImageView)
         }
     }

@@ -9,80 +9,90 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        app:layout_constraintGuide_begin="24dp" />
+        app:layout_constraintGuide_percent="0.0667" />
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/right_guideline"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        app:layout_constraintGuide_end="24dp" />
+        app:layout_constraintGuide_percent="0.9333" />
 
-    <!-- Грандлайн с отступом 82 от верха -->
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/top_guideline"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        app:layout_constraintGuide_begin="48dp" />
+        app:layout_constraintGuide_percent="0.099" />
 
-    <!-- Грандлайн с отступом 438 от низа -->
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/bottom_guideline"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        app:layout_constraintGuide_begin="360dp" />
+        app:layout_constraintGuide_percent="0.4736" />
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/right_guideline1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        app:layout_constraintGuide_end="16dp" />
+        app:layout_constraintGuide_percent="0.9556" />
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/left_guideline2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        app:layout_constraintGuide_begin="16dp" />
+        app:layout_constraintGuide_percent="0.0444" />
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/horizontal_guideline"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        app:layout_constraintGuide_end="184dp" />
+        app:layout_constraintGuide_percent="0.6635" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/top_meta_guideline"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.7837" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/bottom_meta_guideline"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.9759" />
 
 
 
-    <!-- Иконка назад -->
-    <ImageView
-        android:id="@+id/backIcon"
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar"
         style="@style/AudioPlayerBackIconStyle"
-        app:layout_constraintBottom_toTopOf="@id/albumCover"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toTopOf="parent"
+        app:navigationIcon="@drawable/arrowleft" />
 
 
-    <!-- Обложка альбома -->
     <ImageView
         android:id="@+id/albumCover"
-        style="@style/AudioPlayerAlbumCoverStyle"
-        android:src="@drawable/ic_mock"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
         app:layout_constraintBottom_toBottomOf="@id/bottom_guideline"
         app:layout_constraintEnd_toEndOf="@id/right_guideline"
         app:layout_constraintStart_toStartOf="@id/left_guideline"
         app:layout_constraintTop_toTopOf="@id/top_guideline" />
 
-    <!-- Название трека -->
     <TextView
         android:id="@+id/trackName"
         style="@style/AudioPlayerTrackNameStyle"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="24dp"
         android:text="Yesterday (Remastered 2009)"
         android:textSize="18sp"
         android:textStyle="bold"
@@ -92,19 +102,19 @@
         android:maxLines="1"
         android:ellipsize="end" />
 
-    <!-- Исполнитель -->
+
     <TextView
         android:id="@+id/artistName"
         style="@style/AudioPlayerTrackNameStyle"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="12dp"
         android:text="The Beatles"
         app:layout_constraintEnd_toEndOf="@id/right_guideline"
         app:layout_constraintStart_toStartOf="@id/left_guideline"
         app:layout_constraintTop_toBottomOf="@id/trackName" />
 
-    <!-- Кнопка добавить в плейлист -->
+
     <ImageView
         android:id="@+id/addToPlaylist"
         android:layout_width="wrap_content"
@@ -114,7 +124,7 @@
         app:layout_constraintTop_toTopOf="@id/horizontal_guideline"
         app:layout_constraintBottom_toBottomOf="@id/horizontal_guideline" />
 
-    <!-- Кнопка воспроизведения -->
+
     <ImageView
         android:id="@+id/playButton"
         android:layout_width="wrap_content"
@@ -123,7 +133,9 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@id/horizontal_guideline"
-        app:layout_constraintBottom_toBottomOf="@id/horizontal_guideline" />
+        app:layout_constraintBottom_toBottomOf="@id/horizontal_guideline"
+        android:layout_marginEnd="130dp"
+        android:layout_marginStart="130dp"/>
     <!-- Кнопка избранное -->
     <ImageView
         android:id="@+id/favoriteButton"
@@ -149,16 +161,15 @@
         app:layout_constraintVertical_weight="1"
         android:layout_marginBottom="24dp"/>
 
-    <!-- Метаданные трека -->
+
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/metadataLayout"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="30dp"
-        android:layout_marginBottom="20dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="@id/right_guideline1"
-        app:layout_constraintStart_toStartOf="@id/left_guideline2">
+        android:layout_height="0dp"
+        app:layout_constraintTop_toTopOf="@id/top_meta_guideline"
+        app:layout_constraintBottom_toBottomOf="@id/bottom_meta_guideline"
+        app:layout_constraintStart_toStartOf="@id/left_guideline2"
+        app:layout_constraintEnd_toEndOf="@id/right_guideline1">
 
         <androidx.constraintlayout.widget.Guideline
             android:id="@+id/left_guideline3"
@@ -167,53 +178,51 @@
             android:orientation="vertical"
             app:layout_constraintGuide_percent="0.25593668" />
 
-        <!-- Метки -->
         <TextView
             android:id="@+id/labelDuration"
             style="@style/AudioPlayerLabelDuration"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="0dp"
             android:text="Длительность:"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/labelAlbum" />
 
         <TextView
             android:id="@+id/labelAlbum"
             style="@style/AudioPlayerLabelDuration"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="0dp"
             android:text="Альбом:"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/labelDuration" />
+            app:layout_constraintTop_toBottomOf="@id/labelDuration"
+            app:layout_constraintBottom_toTopOf="@id/labelYear" />
 
         <TextView
             android:id="@+id/labelYear"
             style="@style/AudioPlayerLabelDuration"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="0dp"
             android:text="Год:"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/labelAlbum" />
+            app:layout_constraintTop_toBottomOf="@id/labelAlbum"
+            app:layout_constraintBottom_toTopOf="@id/labelGenre" />
 
         <TextView
             android:id="@+id/labelGenre"
             style="@style/AudioPlayerLabelDuration"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="0dp"
             android:text="Жанр:"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/labelYear" />
+            app:layout_constraintTop_toBottomOf="@id/labelYear"
+            app:layout_constraintBottom_toTopOf="@id/labelCountry" />
 
         <TextView
             android:id="@+id/labelCountry"
             style="@style/AudioPlayerLabelDuration"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="0dp"
             android:text="Страна:"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/labelGenre" />
+            app:layout_constraintTop_toBottomOf="@id/labelGenre"
+            app:layout_constraintBottom_toBottomOf="parent" />
 
-        <!-- Значения -->
         <TextView
             android:id="@+id/duration"
             style="@style/AudioPlayerDuration"
@@ -221,7 +230,8 @@
             android:layout_height="wrap_content"
             android:text="5:35"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="@id/labelDuration" />
+            app:layout_constraintTop_toTopOf="@id/labelDuration"
+            app:layout_constraintBottom_toBottomOf="@id/labelDuration" />
 
         <TextView
             android:id="@+id/album"
@@ -232,6 +242,7 @@
             app:layout_constraintStart_toStartOf="@id/left_guideline3"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="@id/labelAlbum"
+            app:layout_constraintBottom_toBottomOf="@id/labelAlbum"
             android:maxLines="1"
             android:ellipsize="end"
             android:gravity="end"/>
@@ -243,7 +254,8 @@
             android:layout_height="wrap_content"
             android:text="1965"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="@id/labelYear" />
+            app:layout_constraintTop_toTopOf="@id/labelYear"
+            app:layout_constraintBottom_toBottomOf="@id/labelYear" />
 
         <TextView
             android:id="@+id/genre"
@@ -252,7 +264,8 @@
             android:layout_height="wrap_content"
             android:text="Rock"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="@id/labelGenre" />
+            app:layout_constraintTop_toTopOf="@id/labelGenre"
+            app:layout_constraintBottom_toBottomOf="@id/labelGenre" />
 
         <TextView
             android:id="@+id/country"
@@ -261,8 +274,10 @@
             android:layout_height="wrap_content"
             android:text="Великобритания"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="@id/labelCountry" />
+            app:layout_constraintTop_toTopOf="@id/labelCountry"
+            app:layout_constraintBottom_toBottomOf="@id/labelCountry" />
     </androidx.constraintlayout.widget.ConstraintLayout>
+
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>
