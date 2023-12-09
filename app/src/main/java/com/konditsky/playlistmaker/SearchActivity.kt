@@ -2,6 +2,7 @@ package com.konditsky.playlistmaker
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.Intent
 import android.content.res.Configuration
 import android.icu.text.SimpleDateFormat
 import android.net.ConnectivityManager
@@ -50,14 +51,20 @@ class SearchActivity : AppCompatActivity() {
 
 
     @SuppressLint("ClickableViewAccessibility")
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_search)
 
 
         trackHistoryManager = SearchHistoryManager(getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE))
-        adapter = TrackAdapter(ArrayList())
+        adapter = TrackAdapter(ArrayList()) { track ->
+            trackHistoryManager.addTrackToHistory(track)
+            updateSearchHistoryDisplay()
+
+            val intent = Intent(this, AudioPlayerActivity::class.java)
+            intent.putExtra("TRACK_DATA", track)
+            startActivity(intent)
+        }
         recyclerView = findViewById(R.id.recyclerViewSearchResults)
         recyclerView.adapter = adapter
 
@@ -141,11 +148,6 @@ class SearchActivity : AppCompatActivity() {
         }
 
 
-        adapter.setOnItemClickListener { track ->
-            trackHistoryManager.addTrackToHistory(track)
-            updateSearchHistoryDisplay()
-        }
-
         editTextSearch.setOnFocusChangeListener { _, hasFocus ->
             if (hasFocus && editTextSearch.text.isEmpty()) {
                 updateSearchHistoryDisplay()
@@ -210,6 +212,7 @@ class SearchActivity : AppCompatActivity() {
 
 
     private fun performSearch(query: String) {
+        Log.d("SearchActivity", "Performing search with query: $query")
         if (query.isEmpty()) {
             updateSearchHistoryDisplay()
             return
@@ -231,6 +234,7 @@ class SearchActivity : AppCompatActivity() {
 
         ApiClient.instance.search(query).enqueue(object : Callback<ItunesResponse> {
             override fun onResponse(call: Call<ItunesResponse>, response: Response<ItunesResponse>) {
+                Log.d("SearchActivity", "Search response: ${response.body()}")
                 if (response.isSuccessful) {
                     val tracks = response.body()?.results?.map { trackResponseToTrack(it) } ?: listOf()
                     if (tracks.isEmpty()) {
@@ -248,6 +252,7 @@ class SearchActivity : AppCompatActivity() {
                 }
             }
             override fun onFailure(call: Call<ItunesResponse>, t: Throwable) {
+                Log.e("SearchActivity", "Search error: ${t.message}")
                 serverErrorPlaceholder.visibility = View.VISIBLE
                 noResultsPlaceholder.visibility = View.GONE
                 recyclerView.visibility = View.GONE
@@ -258,16 +263,23 @@ class SearchActivity : AppCompatActivity() {
 
 
     private fun trackResponseToTrack(trackResponse: TrackResponse): Track {
-        val timeMillis = Date(trackResponse.trackTimeMillis)
-        val time = SimpleDateFormat("mm:ss", Locale.getDefault()).format(timeMillis)
+        val timeMillis = trackResponse.trackTimeMillis?.let { Date(it) }
+        val time = timeMillis?.let { SimpleDateFormat("mm:ss", Locale.getDefault()).format(it) } ?: "Unknown Time"
+
         return Track(
             trackId = 0L,
-            trackName = trackResponse.trackName,
-            artistName = trackResponse.artistName,
+            trackName = trackResponse.trackName ?: "Unknown Track",
+            artistName = trackResponse.artistName ?: "Unknown Artist",
             trackTime = time,
-            artworkUrl100 = trackResponse.artworkUrl100
+            artworkUrl100 = trackResponse.artworkUrl100 ?: "Default URL",
+            collectionName = trackResponse.collectionName,
+            releaseDate = trackResponse.releaseDate ?: "Unknown Release Date",
+            primaryGenreName = trackResponse.primaryGenreName ?: "Unknown Genre",
+            country = trackResponse.country ?: "Unknown Country"
         )
     }
+
+
 
     private fun updateClearIcon() {
         if (editTextSearch.text.isNotEmpty()) {

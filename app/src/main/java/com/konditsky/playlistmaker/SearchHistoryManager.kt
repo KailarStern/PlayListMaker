@@ -9,6 +9,7 @@ class SearchHistoryManager(private val sharedPreferences: SharedPreferences) {
     private val gson = Gson()
 
     fun addTrackToHistory(track: Track) {
+        Log.d("SearchHistoryManager", "Adding track to history: $track")
         val tracks = getTrackHistory().toMutableList()
         tracks.removeIf { it.trackName == track.trackName && it.artistName == track.artistName }
         tracks.add(0, track)
@@ -19,16 +20,27 @@ class SearchHistoryManager(private val sharedPreferences: SharedPreferences) {
     }
 
     fun getTrackHistory(): List<Track> {
-        val json = sharedPreferences.getString("track_history", null) ?: return emptyList()
+        val json = sharedPreferences.getString("track_history", null)
+        Log.d("SearchHistoryManager", "Track history JSON from SharedPreferences: $json")
+        if (json == null) {
+            Log.d("SearchHistoryManager", "No track history found. Returning empty list.")
+            return emptyList()
+        }
         val type = object : TypeToken<List<Track>>() {}.type
-        return gson.fromJson(json, type) ?: emptyList()
+        val result = gson.fromJson<List<Track>>(json, type)
+
+        Log.d("SearchHistoryManager", "Deserialized track history: $result")
+
+        return result ?: emptyList()
     }
+
 
     fun clearTrackHistory() {
         sharedPreferences.edit().remove("track_history").apply()
     }
 
     private fun saveTrackHistory(tracks: List<Track>) {
+        Log.d("SearchHistoryManager", "Saving track history: $tracks")
         val json = gson.toJson(tracks)
         sharedPreferences.edit().putString("track_history", json).apply()
     }

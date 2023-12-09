@@ -6,6 +6,7 @@
 
 
     <application
+        android:name=".App"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
@@ -16,6 +17,9 @@
         android:theme="@style/Theme.MaterialComponents.DayNight.NoActionBar"
         android:configChanges="uiMode"
         tools:targetApi="31">
+        <activity
+            android:name=".AudioPlayerActivity"
+            android:exported="true" />
         <activity
             android:name=".MediaActivity"
             android:exported="false" />
