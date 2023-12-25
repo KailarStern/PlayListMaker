@@ -7,6 +7,8 @@ import android.content.res.Configuration
 import android.icu.text.SimpleDateFormat
 import android.net.ConnectivityManager
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
@@ -19,6 +21,7 @@ import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.LinearLayout
+import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -43,6 +46,14 @@ class SearchActivity : AppCompatActivity() {
     private lateinit var trackHistoryManager: SearchHistoryManager
     private lateinit var youSearchedView: TextView
     private lateinit var clearHistoryButton: Button
+    private lateinit var progressBar: ProgressBar
+    private lateinit var searchRunnable: Runnable
+
+    private val searchHandler = Handler(Looper.getMainLooper())
+    private val searchDelay = 2000L
+    private val itemClickHandler = Handler(Looper.getMainLooper())
+    private var itemClickRunnable: Runnable? = null
+    private val itemClickDelay = 500L
     companion object {
         const val SEARCH_QUERY_KEY = "SEARCH_QUERY"
         private const val PREFS_NAME = "com.konditsky.playlistmaker.prefs"
@@ -55,16 +66,22 @@ class SearchActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_search)
 
+        progressBar = findViewById(R.id.progressBar)
+        editTextSearch = findViewById(R.id.editTextSearch)
 
         trackHistoryManager = SearchHistoryManager(getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE))
         adapter = TrackAdapter(ArrayList()) { track ->
-            trackHistoryManager.addTrackToHistory(track)
-            updateSearchHistoryDisplay()
-
-            val intent = Intent(this, AudioPlayerActivity::class.java)
-            intent.putExtra("TRACK_DATA", track)
-            startActivity(intent)
+            itemClickRunnable?.let { itemClickHandler.removeCallbacks(it) }
+            itemClickRunnable = Runnable {
+                trackHistoryManager.addTrackToHistory(track)
+                updateSearchHistoryDisplay()
+                val intent = Intent(this, AudioPlayerActivity::class.java)
+                intent.putExtra("TRACK_DATA", track)
+                startActivity(intent)
+            }
+            itemClickHandler.postDelayed(itemClickRunnable!!, itemClickDelay)
         }
+
         recyclerView = findViewById(R.id.recyclerViewSearchResults)
         recyclerView.adapter = adapter
 
@@ -81,6 +98,7 @@ class SearchActivity : AppCompatActivity() {
         serverErrorPlaceholder = findViewById(R.id.serverErrorPlaceholder)
         youSearchedView = findViewById(R.id.textViewSearchHistoryLabel)
         clearHistoryButton = findViewById(R.id.buttonClearSearchHistory)
+        progressBar = findViewById(R.id.progressBar)
 
 
         backButton.setOnClickListener {
@@ -108,7 +126,24 @@ class SearchActivity : AppCompatActivity() {
 
         setupUIBehavior()
         updateSearchHistoryDisplay()
+        setupSearch()
     }
+
+    private fun setupSearch() {
+        searchRunnable = Runnable {
+            performSearch(editTextSearch.text.toString())
+        }
+
+        editTextSearch.addTextChangedListener(object : TextWatcher {
+            override fun afterTextChanged(s: Editable?) {
+                searchHandler.removeCallbacks(searchRunnable)
+                searchHandler.postDelayed(searchRunnable, searchDelay)
+            }
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+        })
+    }
+
 
 
 
@@ -217,7 +252,7 @@ class SearchActivity : AppCompatActivity() {
             updateSearchHistoryDisplay()
             return
         }
-
+        showProgressBar()
         saveSearchQuery(query)
 
         youSearchedView.visibility = View.GONE
@@ -235,6 +270,7 @@ class SearchActivity : AppCompatActivity() {
         ApiClient.instance.search(query).enqueue(object : Callback<ItunesResponse> {
             override fun onResponse(call: Call<ItunesResponse>, response: Response<ItunesResponse>) {
                 Log.d("SearchActivity", "Search response: ${response.body()}")
+                hideProgressBar()
                 if (response.isSuccessful) {
                     val tracks = response.body()?.results?.map { trackResponseToTrack(it) } ?: listOf()
                     if (tracks.isEmpty()) {
@@ -253,6 +289,7 @@ class SearchActivity : AppCompatActivity() {
             }
             override fun onFailure(call: Call<ItunesResponse>, t: Throwable) {
                 Log.e("SearchActivity", "Search error: ${t.message}")
+                hideProgressBar()
                 serverErrorPlaceholder.visibility = View.VISIBLE
                 noResultsPlaceholder.visibility = View.GONE
                 recyclerView.visibility = View.GONE
@@ -275,7 +312,8 @@ class SearchActivity : AppCompatActivity() {
             collectionName = trackResponse.collectionName,
             releaseDate = trackResponse.releaseDate ?: "Unknown Release Date",
             primaryGenreName = trackResponse.primaryGenreName ?: "Unknown Genre",
-            country = trackResponse.country ?: "Unknown Country"
+            country = trackResponse.country ?: "Unknown Country",
+            previewUrl = trackResponse.previewUrl ?: "Default Preview URL"
         )
     }
 
@@ -328,6 +366,28 @@ class SearchActivity : AppCompatActivity() {
     private fun isDarkTheme(): Boolean {
         return resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES
     }
+
+
+    private fun showProgressBar() {
+        progressBar.visibility = View.VISIBLE
+        recyclerView.visibility = View.GONE
+        noResultsPlaceholder.visibility = View.GONE
+        serverErrorPlaceholder.visibility = View.GONE
+        youSearchedView.visibility = View.GONE
+        clearHistoryButton.visibility = View.GONE
+    }
+
+    private fun hideProgressBar() {
+        progressBar.visibility = View.GONE
+        recyclerView.visibility = View.VISIBLE
+        if (trackHistoryManager.getTrackHistory().isEmpty()) {
+            noResultsPlaceholder.visibility = View.VISIBLE
+        } else {
+            youSearchedView.visibility = View.VISIBLE
+            clearHistoryButton.visibility = View.VISIBLE
+        }
+    }
+
 
 
 }
