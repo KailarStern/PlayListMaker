@@ -130,6 +130,15 @@ class AudioPlayerActivity : AppCompatActivity() {
         super.onDestroy()
     }
 
+    override fun onPause() {
+        super.onPause()
+        if (mediaPlayer?.isPlaying == true) {
+            mediaPlayer?.pause()
+            playButton.setImageResource(R.drawable.play_button)
+        }
+        handler.removeCallbacksAndMessages(null)
+    }
+
     companion object {
         private const val MILLISECONDS_IN_SECOND = 1000
         private const val SECONDS_IN_MINUTE = 60
