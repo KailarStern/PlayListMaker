@@ -21,9 +21,9 @@ data class Track(
         val outputFormat = SimpleDateFormat("yyyy", Locale.getDefault())
         return try {
             val date = inputFormat.parse(releaseDate)
-            date?.let { outputFormat.format(it) } ?: "Unknown"
+            date?.let { outputFormat.format(it) } ?: "Неизвестно"
         } catch (e: Exception) {
-            "Unknown"
+            "Неизвестно" //надо ли было выносить это в string?
         }
     }
     fun getHighQualityArtworkUrl() = artworkUrl100.replaceAfterLast('/', "512x512bb.jpg")

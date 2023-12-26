@@ -17,4 +17,20 @@
     <string name="ResultsPlaceholder">Ничего не нашлось</string>
     <string name="server_error_text">Проблемы со связью\n\nЗагрузка не удалась. Проверьте\nподключение к интернету</string>
 
+    <!-- Сёрч Активити-->
+    <string name="unknown_country">Unknown Country</string>
+    <string name="unknown_genre">Unknown Genre</string>
+    <string name="unknown_release_date">Unknown Release Date</string>
+    <string name="unknown_track">Unknown Track</string>
+    <string name="unknown_artist">Unknown Artist</string>
+    <string name="default_url">Default URL</string>
+    <string name="default_preview_url">Default Preview URL</string>
+
+    <!-- Аудио Плеер Активити-->
+    <string name="unknown_album">Unknown Album</string>
+    <string name="initial_time">00:00</string>
+
+    <!-- Трак Активити-->
+    <string name="unknow">Неизвестно</string>
+
 </resources>

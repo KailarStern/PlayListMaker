@@ -11,6 +11,7 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
+import java.util.Locale
 
 
 class AudioPlayerActivity : AppCompatActivity() {
@@ -70,7 +71,7 @@ class AudioPlayerActivity : AppCompatActivity() {
     private fun updateTrackInfoUI(track: Track) {
         trackNameTextView.text = track.trackName
         artistNameTextView.text = track.artistName
-        albumTextView.text = track.collectionName ?: "Unknown Album"
+        albumTextView.text = track.collectionName ?: getString(R.string.unknown_album)
         yearTextView.text = track.getFormattedReleaseYear()
         genreTextView.text = track.primaryGenreName
         countryTextView.text = track.country
@@ -100,7 +101,7 @@ class AudioPlayerActivity : AppCompatActivity() {
             }
             setOnCompletionListener {
                 playButton.setImageResource(R.drawable.play_button)
-                currentTimeTextView .text = "00:00"
+                currentTimeTextView.text = getString(R.string.initial_time)
             }
         }
     }
@@ -110,19 +111,29 @@ class AudioPlayerActivity : AppCompatActivity() {
             override fun run() {
                 mediaPlayer?.let {
                     if (it.isPlaying) {
-                        val currentPosition = it.currentPosition / 1000
-                        currentTimeTextView .text = String.format("%02d:%02d", currentPosition / 60, currentPosition % 60)
-                        handler.postDelayed(this, 1000)
+                        val currentPosition = it.currentPosition / MILLISECONDS_IN_SECOND
+                        currentTimeTextView.text = String.format(
+                            Locale.getDefault(), "%02d:%02d",
+                            currentPosition / SECONDS_IN_MINUTE,
+                            currentPosition % SECONDS_IN_MINUTE
+                        )
+                        handler.postDelayed(this, PROGRESS_UPDATE_DELAY)
                     }
                 }
             }
-        }, 1000)
+        }, PROGRESS_UPDATE_DELAY)
     }
 
     override fun onDestroy() {
         mediaPlayer?.release()
         mediaPlayer = null
         super.onDestroy()
+    }
+
+    companion object {
+        private const val MILLISECONDS_IN_SECOND = 1000
+        private const val SECONDS_IN_MINUTE = 60
+        private const val PROGRESS_UPDATE_DELAY = 1000L
     }
 
 }

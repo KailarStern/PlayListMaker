@@ -12,11 +12,6 @@ import android.widget.Switch
 import androidx.appcompat.app.AppCompatDelegate
 
 class SettingsActivity : AppCompatActivity() {
-
-    companion object {
-        private const val THEME_PREF = "com.konditsky.playlistmaker.prefs"
-        private const val DARK_THEME = "DARK_THEME"
-    }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_settings)
@@ -51,12 +46,7 @@ class SettingsActivity : AppCompatActivity() {
                 if (isChecked) AppCompatDelegate.MODE_NIGHT_YES else AppCompatDelegate.MODE_NIGHT_NO
             )
         }
-
-
-
-
     }
-
 
     private fun shareAppLink() {
         val shareIntent = Intent().apply {
@@ -70,7 +60,7 @@ class SettingsActivity : AppCompatActivity() {
     private fun sendSupportEmail() {
         Intent(Intent.ACTION_SENDTO).apply {
             data = Uri.parse("mailto:")
-            putExtra(Intent.EXTRA_EMAIL, arrayOf("SternKailar@yandex.ru"))
+            putExtra(Intent.EXTRA_EMAIL, arrayOf(EMAIL_ADDRESS))
             putExtra(Intent.EXTRA_SUBJECT, getString(R.string.text_to_dv1st))
             putExtra(Intent.EXTRA_TEXT, getString(R.string.text_to_dv2st))
             startActivity(this)
@@ -94,6 +84,12 @@ class SettingsActivity : AppCompatActivity() {
     private fun loadThemeSetting(): Boolean {
         val prefs = getSharedPreferences(THEME_PREF, Context.MODE_PRIVATE)
         return prefs.getBoolean(DARK_THEME, false)
+    }
+
+    companion object {
+        private const val THEME_PREF = "com.konditsky.playlistmaker.prefs"
+        private const val DARK_THEME = "DARK_THEME"
+        private const val EMAIL_ADDRESS = "SternKailar@yandex.ru"
     }
 
 }
