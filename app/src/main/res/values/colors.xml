@@ -16,11 +16,16 @@
     <color name="ColorForTextViewSearchHistoryLabel">#FF000000</color>
     <color name="ColorForButtonClearSearchHistoryText">#FFFFFFFF</color>
     <color name="ColorForButtonClearSearchHistoryBackground">#FF000000</color>
+    <color name="ColorProgressBar">#3772E7</color>
 
     <!--АудиоПлеер-->
     <color name="AudioPlayerBackIcon">#1A1B22</color>
     <color name="AudioPlayerText">#1A1B22</color>
     <color name="AudioPlayerIcons">#1A1B22</color>
     <color name="AudioPlayerIconPlay">#1A1B22</color>
+    <color name="AudioPlayerArrowLeft">#1A1B22</color>
+
+
+
 
 </resources>
