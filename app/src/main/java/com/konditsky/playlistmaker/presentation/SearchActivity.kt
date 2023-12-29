@@ -1,4 +1,4 @@
-    package com.konditsky.playlistmaker
+    package com.konditsky.playlistmaker.presentation
     
     import android.annotation.SuppressLint
     import android.content.Context
@@ -11,7 +11,6 @@
     import android.os.Looper
     import android.text.Editable
     import android.text.TextWatcher
-    import android.util.Log
     import android.view.MotionEvent
     import android.view.View
     import android.view.inputmethod.EditorInfo
@@ -23,10 +22,11 @@
     import android.widget.LinearLayout
     import android.widget.ProgressBar
     import android.widget.TextView
-    import android.widget.Toast
     import androidx.appcompat.app.AppCompatActivity
-    import androidx.appcompat.app.AppCompatDelegate
     import androidx.recyclerview.widget.RecyclerView
+    import com.konditsky.playlistmaker.R
+    import com.konditsky.playlistmaker.domain.SearchHistoryManager
+    import com.konditsky.playlistmaker.domain.Track
     import com.konditsky.playlistmaker.api.ApiClient
     import com.konditsky.playlistmaker.api.ItunesResponse
     import com.konditsky.playlistmaker.api.TrackResponse
@@ -65,7 +65,7 @@
             progressBar = findViewById(R.id.progressBar)
             editTextSearch = findViewById(R.id.editTextSearch)
     
-            trackHistoryManager = SearchHistoryManager(getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE))
+            trackHistoryManager = SearchHistoryManager(getSharedPreferences(PREFS_NAME, MODE_PRIVATE))
             adapter = TrackAdapter(ArrayList()) { track ->
                 itemClickRunnable?.let { itemClickHandler.removeCallbacks(it) }
                 itemClickRunnable = Runnable {
@@ -323,7 +323,9 @@
     
         private fun updateClearIcon() {
             if (editTextSearch.text.isNotEmpty()) {
-                editTextSearch.setCompoundDrawablesWithIntrinsicBounds(R.drawable.button_search, 0, R.drawable.clear, 0)
+                editTextSearch.setCompoundDrawablesWithIntrinsicBounds(
+                    R.drawable.button_search, 0,
+                    R.drawable.clear, 0)
             } else {
                 editTextSearch.setCompoundDrawablesWithIntrinsicBounds(R.drawable.button_search, 0, 0, 0)
             }
