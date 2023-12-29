@@ -1,4 +1,4 @@
-package com.konditsky.playlistmaker
+package com.konditsky.playlistmaker.domain
 
 import android.icu.text.SimpleDateFormat
 import java.io.Serializable

@@ -1,4 +1,4 @@
-package com.konditsky.playlistmaker
+package com.konditsky.playlistmaker.domain
 
 import android.content.SharedPreferences
 import android.util.Log
