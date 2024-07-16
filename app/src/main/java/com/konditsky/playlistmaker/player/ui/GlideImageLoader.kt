@@ -1,8 +1,7 @@
-package com.konditsky.playlistmaker.data
+package com.konditsky.playlistmaker.player.ui
 
 import android.widget.ImageView
 import com.bumptech.glide.Glide
-import com.konditsky.playlistmaker.domain.ImageLoader
 
 class GlideImageLoader : ImageLoader {
     override fun loadImage(url: String, into: ImageView) {

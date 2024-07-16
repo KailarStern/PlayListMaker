@@ -1,4 +1,4 @@
-package com.konditsky.playlistmaker.presentation
+package com.konditsky.playlistmaker.sharing.ui
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle

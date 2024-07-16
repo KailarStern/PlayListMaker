@@ -1,4 +1,4 @@
-package com.konditsky.playlistmaker.domain
+package com.konditsky.playlistmaker.player.ui
 
 import android.widget.ImageView
 

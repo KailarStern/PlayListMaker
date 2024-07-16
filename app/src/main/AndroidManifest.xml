@@ -6,7 +6,7 @@
 
 
     <application
-        android:name=".presentation.App"
+        android:name=".main.data.App"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
@@ -18,19 +18,19 @@
         android:configChanges="uiMode"
         tools:targetApi="31">
         <activity
-            android:name=".presentation.AudioPlayerActivity"
+            android:name=".player.ui.AudioPlayerActivity"
             android:exported="true" />
         <activity
-            android:name=".presentation.MediaActivity"
+            android:name=".sharing.ui.MediaActivity"
             android:exported="false" />
         <activity
-            android:name=".presentation.SearchActivity"
+            android:name=".search.ui.SearchActivity"
             android:exported="false"/>
         <activity
-            android:name=".presentation.SettingsActivity"
+            android:name=".settings.ui.SettingsActivity"
             android:exported="false" />
         <activity
-            android:name=".presentation.MainActivity"
+            android:name=".main.ui.MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

@@ -1,26 +1,20 @@
-package com.konditsky.playlistmaker.presentation
+package com.konditsky.playlistmaker.player.ui
 
-import android.media.AudioAttributes
-import android.media.MediaPlayer
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import com.bumptech.glide.Glide
-import com.bumptech.glide.load.resource.bitmap.RoundedCorners
+import androidx.lifecycle.Observer
 import com.konditsky.playlistmaker.R
-import com.konditsky.playlistmaker.data.GlideImageLoader
-import com.konditsky.playlistmaker.data.MediaPlayerManager
-import com.konditsky.playlistmaker.domain.ImageLoader
-import com.konditsky.playlistmaker.domain.Track
-import com.konditsky.playlistmaker.domain.TrackPlayer
-import java.util.Locale
+import com.konditsky.playlistmaker.search.ui.Track
+
 
 
 class AudioPlayerActivity : AppCompatActivity() {
-    private lateinit var trackPlayer: TrackPlayer
+    private val viewModel: AudioPlayerViewModel by viewModels()
     private lateinit var imageLoader: ImageLoader
 
     private lateinit var playButton: ImageView
@@ -33,34 +27,37 @@ class AudioPlayerActivity : AppCompatActivity() {
     private lateinit var countryTextView: TextView
     private lateinit var albumCoverImageView: ImageView
 
+    private val handler = Handler(Looper.getMainLooper())
+    private val updateRunnable = object : Runnable {
+        override fun run() {
+            viewModel.updateCurrentPosition()
+            handler.postDelayed(this, 1000)
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_audioplayer)
 
         initializeUIComponents()
-
-        // Dependency injection or service locator can be used here
-        trackPlayer = MediaPlayerManager()
-        imageLoader = GlideImageLoader()
+        setupObservers()
+        handler.post(updateRunnable)
 
         val track = intent.getSerializableExtra("TRACK_DATA") as? Track
         track?.let {
-            trackPlayer.prepare(it.previewUrl)
+            viewModel.playOrPause(it.previewUrl)
             updateTrackInfoUI(it)
         }
 
         playButton.setOnClickListener {
-            if (trackPlayer.isPlaying()) {
-                trackPlayer.pause()
-                playButton.setImageResource(R.drawable.play_button)
-            } else {
-                trackPlayer.play()
-                playButton.setImageResource(R.drawable.pause_button)
+            track?.let {
+                viewModel.playOrPause(it.previewUrl)
             }
         }
     }
 
     private fun initializeUIComponents() {
+        imageLoader = GlideImageLoader()
         playButton = findViewById(R.id.playButton)
         currentTimeTextView = findViewById(R.id.currentTime)
         trackNameTextView = findViewById(R.id.trackName)
@@ -72,6 +69,20 @@ class AudioPlayerActivity : AppCompatActivity() {
         albumCoverImageView = findViewById(R.id.albumCover)
     }
 
+    private fun setupObservers() {
+        viewModel.playbackState.observe(this, Observer { isPlaying ->
+            if (isPlaying) {
+                playButton.setImageResource(R.drawable.pause_button)
+            } else {
+                playButton.setImageResource(R.drawable.play_button)
+            }
+        })
+
+        viewModel.currentPosition.observe(this, Observer { position ->
+            currentTimeTextView.text = formatTime(position)
+        })
+    }
+
     private fun updateTrackInfoUI(track: Track) {
         trackNameTextView.text = track.trackName
         artistNameTextView.text = track.artistName
@@ -79,12 +90,17 @@ class AudioPlayerActivity : AppCompatActivity() {
         yearTextView.text = track.getFormattedReleaseYear()
         genreTextView.text = track.primaryGenreName
         countryTextView.text = track.country
-
         imageLoader.loadImage(track.artworkUrl100, albumCoverImageView)
+    }
+
+    private fun formatTime(milliseconds: Int): String {
+        val seconds = (milliseconds / 1000) % 60
+        val minutes = (milliseconds / (1000 * 60)) % 60
+        return String.format("%02d:%02d", minutes, seconds)
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        trackPlayer.release()
+        handler.removeCallbacks(updateRunnable)
     }
 }

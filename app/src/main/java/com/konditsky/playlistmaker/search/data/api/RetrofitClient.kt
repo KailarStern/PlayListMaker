@@ -1,4 +1,4 @@
-package com.konditsky.playlistmaker.api
+package com.konditsky.playlistmaker.search.data.api
 
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -12,6 +12,7 @@ object ApiClient {
             .addConverterFactory(GsonConverterFactory.create())
             .build()
 
-        retrofit.create(ItunesService::class.java)
+        val service = retrofit.create(ItunesService::class.java)
+        service
     }
 }

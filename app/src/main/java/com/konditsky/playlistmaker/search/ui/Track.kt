@@ -1,4 +1,4 @@
-package com.konditsky.playlistmaker.domain
+package com.konditsky.playlistmaker.search.ui
 
 import android.icu.text.SimpleDateFormat
 import java.io.Serializable
@@ -23,7 +23,7 @@ data class Track(
             val date = inputFormat.parse(releaseDate)
             date?.let { outputFormat.format(it) } ?: "Неизвестно"
         } catch (e: Exception) {
-            "Неизвестно" //надо ли было выносить это в string?
+            "Неизвестно"
         }
     }
     fun getHighQualityArtworkUrl() = artworkUrl100.replaceAfterLast('/', "512x512bb.jpg")
