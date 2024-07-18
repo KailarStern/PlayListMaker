@@ -7,11 +7,10 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.Toolbar
 import androidx.lifecycle.Observer
 import com.konditsky.playlistmaker.R
 import com.konditsky.playlistmaker.search.ui.Track
-
-
 
 class AudioPlayerActivity : AppCompatActivity() {
     private val viewModel: AudioPlayerViewModel by viewModels()
@@ -43,9 +42,13 @@ class AudioPlayerActivity : AppCompatActivity() {
         setupObservers()
         handler.post(updateRunnable)
 
+        val toolbar = findViewById<Toolbar>(R.id.toolbar)
+        toolbar.setNavigationOnClickListener {
+            onBackPressed()
+        }
+
         val track = intent.getSerializableExtra("TRACK_DATA") as? Track
         track?.let {
-            viewModel.playOrPause(it.previewUrl)
             updateTrackInfoUI(it)
         }
 
@@ -81,6 +84,13 @@ class AudioPlayerActivity : AppCompatActivity() {
         viewModel.currentPosition.observe(this, Observer { position ->
             currentTimeTextView.text = formatTime(position)
         })
+
+        viewModel.isTrackCompleted.observe(this, Observer { isCompleted ->
+            if (isCompleted) {
+                playButton.setImageResource(R.drawable.play_button)
+                currentTimeTextView.text = formatTime(0)
+            }
+        })
     }
 
     private fun updateTrackInfoUI(track: Track) {
@@ -90,7 +100,7 @@ class AudioPlayerActivity : AppCompatActivity() {
         yearTextView.text = track.getFormattedReleaseYear()
         genreTextView.text = track.primaryGenreName
         countryTextView.text = track.country
-        imageLoader.loadImage(track.artworkUrl100, albumCoverImageView)
+        imageLoader.loadImage(track.getHighQualityArtworkUrl(), albumCoverImageView)
     }
 
     private fun formatTime(milliseconds: Int): String {
@@ -104,3 +114,9 @@ class AudioPlayerActivity : AppCompatActivity() {
         handler.removeCallbacks(updateRunnable)
     }
 }
+
+
+
+
+
+

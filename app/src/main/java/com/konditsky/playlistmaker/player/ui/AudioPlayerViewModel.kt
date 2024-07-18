@@ -12,9 +12,17 @@ class AudioPlayerViewModel : ViewModel() {
     private val _playbackState = MutableLiveData<Boolean>()
     val playbackState: LiveData<Boolean> = _playbackState
 
-
     private val _currentPosition = MutableLiveData<Int>()
     val currentPosition: LiveData<Int> get() = _currentPosition
+
+    private val _isTrackCompleted = MutableLiveData<Boolean>()
+    val isTrackCompleted: LiveData<Boolean> get() = _isTrackCompleted
+
+    init {
+        trackPlayer.setOnCompletionListener {
+            _isTrackCompleted.value = true
+        }
+    }
 
     fun playOrPause(url: String) {
         if (trackPlayer.isPlaying()) {
@@ -25,6 +33,7 @@ class AudioPlayerViewModel : ViewModel() {
             trackPlayer.play()
             _playbackState.value = true
             updateCurrentPosition()
+            _isTrackCompleted.value = false
         }
     }
 
@@ -37,4 +46,7 @@ class AudioPlayerViewModel : ViewModel() {
         trackPlayer.release()
     }
 }
+
+
+
 

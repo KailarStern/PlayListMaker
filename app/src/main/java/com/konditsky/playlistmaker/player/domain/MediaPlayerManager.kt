@@ -13,7 +13,6 @@ class MediaPlayerManager : TrackPlayer {
     private val _error = MutableLiveData<String>()
     val error: LiveData<String> get() = _error
 
-
     private val _currentPosition = MutableLiveData<Int>()
     val currentPosition: LiveData<Int> get() = _currentPosition
 
@@ -70,8 +69,17 @@ class MediaPlayerManager : TrackPlayer {
         return mediaPlayer.currentPosition
     }
 
+    override fun setOnCompletionListener(listener: () -> Unit) {
+        mediaPlayer.setOnCompletionListener {
+            listener()
+        }
+    }
+
     fun updateCurrentPosition() {
         _currentPosition.postValue(mediaPlayer.currentPosition)
     }
 }
+
+
+
 

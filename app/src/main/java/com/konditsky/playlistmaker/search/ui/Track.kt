@@ -26,6 +26,11 @@ data class Track(
             "Неизвестно"
         }
     }
-    fun getHighQualityArtworkUrl() = artworkUrl100.replaceAfterLast('/', "512x512bb.jpg")
+
+    fun getHighQualityArtworkUrl(): String {
+        return artworkUrl100.replaceAfterLast('/', "512x512bb.jpg")
+    }
 }
+
+
 

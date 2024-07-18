@@ -9,7 +9,6 @@ import com.konditsky.playlistmaker.search.data.api.ItunesResponse
 import com.konditsky.playlistmaker.search.domain.SearchHistoryInteractor
 import com.konditsky.playlistmaker.search.data.api.ItunesService
 import com.konditsky.playlistmaker.search.data.api.TrackResponse
-import com.konditsky.playlistmaker.search.ui.Track
 import kotlinx.coroutines.launch
 import retrofit2.Call
 import retrofit2.Callback
@@ -32,6 +31,9 @@ class SearchViewModel(
 
     private val _isError = MutableLiveData<Boolean>()
     val isError: LiveData<Boolean> get() = _isError
+
+    private val _isSearchPerformed = MutableLiveData<Boolean>()
+    val isSearchPerformed: LiveData<Boolean> get() = _isSearchPerformed
 
     fun fetchTrackHistory() {
         viewModelScope.launch {
@@ -57,6 +59,7 @@ class SearchViewModel(
     fun searchTracks(query: String) {
         _isLoading.value = true
         _isError.value = false
+        _isSearchPerformed.value = true
 
         itunesService.search(query).enqueue(object : Callback<ItunesResponse> {
             override fun onResponse(call: Call<ItunesResponse>, response: Response<ItunesResponse>) {
@@ -79,11 +82,11 @@ class SearchViewModel(
     private fun trackResponseToTrack(trackResponse: TrackResponse): Track {
         return Track(
             trackId = trackResponse.trackId ?: 0L,
-            trackName = trackResponse.trackName ?: "Unkno   wn",
+            trackName = trackResponse.trackName ?: "Unknown",
             artistName = trackResponse.artistName ?: "Unknown",
-            trackTime = trackResponse.trackTimeMillis?.let { SimpleDateFormat("mm:ss", Locale.getDefault()).format(
-                Date(it)
-            ) } ?: "Unknown",
+            trackTime = trackResponse.trackTimeMillis?.let {
+                SimpleDateFormat("mm:ss", Locale.getDefault()).format(Date(it))
+            } ?: "Unknown",
             artworkUrl100 = trackResponse.artworkUrl100 ?: "",
             collectionName = trackResponse.collectionName,
             releaseDate = trackResponse.releaseDate ?: "",
@@ -93,6 +96,8 @@ class SearchViewModel(
         )
     }
 }
+
+
 
 
 
