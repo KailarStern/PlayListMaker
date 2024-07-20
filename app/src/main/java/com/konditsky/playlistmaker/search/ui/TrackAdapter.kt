@@ -1,9 +1,10 @@
-package com.konditsky.playlistmaker
+package com.konditsky.playlistmaker.search.ui
 
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import com.konditsky.playlistmaker.R
 
 class TrackAdapter(
     private var trackList: ArrayList<Track>,

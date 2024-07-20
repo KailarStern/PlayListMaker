@@ -1,9 +1,9 @@
-package com.konditsky.playlistmaker
+package com.konditsky.playlistmaker.search.data
 
 import android.content.SharedPreferences
-import android.util.Log
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import com.konditsky.playlistmaker.search.ui.Track
 
 class SearchHistoryManager(private val sharedPreferences: SharedPreferences) {
     private val gson = Gson()
@@ -25,12 +25,8 @@ class SearchHistoryManager(private val sharedPreferences: SharedPreferences) {
         }
         val type = object : TypeToken<List<Track>>() {}.type
         val result = gson.fromJson<List<Track>>(json, type)
-
-        Log.d("SearchHistoryManager", "Deserialized track history: $result")
-
         return result ?: emptyList()
     }
-
 
     fun clearTrackHistory() {
         sharedPreferences.edit().remove("track_history").apply()
@@ -41,3 +37,4 @@ class SearchHistoryManager(private val sharedPreferences: SharedPreferences) {
         sharedPreferences.edit().putString("track_history", json).apply()
     }
 }
+

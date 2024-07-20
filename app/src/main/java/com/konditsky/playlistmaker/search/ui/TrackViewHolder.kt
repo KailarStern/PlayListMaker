@@ -1,4 +1,4 @@
-package com.konditsky.playlistmaker
+package com.konditsky.playlistmaker.search.ui
 
 import android.view.View
 import android.widget.ImageView
@@ -8,6 +8,7 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.CenterCrop
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.bumptech.glide.request.RequestOptions
+import com.konditsky.playlistmaker.R
 
 class TrackViewHolder(view: View) : RecyclerView.ViewHolder(view) {
     private val trackNameTextView: TextView = view.findViewById(R.id.textTrackName)

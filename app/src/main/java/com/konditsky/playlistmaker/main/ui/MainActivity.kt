@@ -1,13 +1,13 @@
-package com.konditsky.playlistmaker
+package com.konditsky.playlistmaker.main.ui
 
-import android.content.Context
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.view.View
 import android.widget.Button
-import android.widget.Toast
-import androidx.appcompat.app.AppCompatDelegate
+import com.konditsky.playlistmaker.R
+import com.konditsky.playlistmaker.sharing.ui.MediaActivity
+import com.konditsky.playlistmaker.search.ui.SearchActivity
+import com.konditsky.playlistmaker.settings.ui.SettingsActivity
 
 class MainActivity : AppCompatActivity() {
 

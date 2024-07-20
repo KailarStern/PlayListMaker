@@ -1,17 +1,24 @@
-package com.konditsky.playlistmaker
+package com.konditsky.playlistmaker.settings.ui
 
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.widget.Button
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.Switch
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.lifecycle.Observer
+import com.konditsky.playlistmaker.R
+import com.konditsky.playlistmaker.settings.data.impl.SettingsRepositoryImpl
+import com.konditsky.playlistmaker.settings.domain.impl.SettingsInteractorImpl
 
 class SettingsActivity : AppCompatActivity() {
+    private val viewModel: SettingsViewModel by viewModels {
+        SettingsViewModelFactory(SettingsInteractorImpl(SettingsRepositoryImpl(getSharedPreferences(THEME_PREF, Context.MODE_PRIVATE))))
+    }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_settings)
@@ -22,7 +29,13 @@ class SettingsActivity : AppCompatActivity() {
         val termsImageView = findViewById<ImageView>(R.id.imageSettingsTerms)
         val themeSwitch = findViewById<Switch>(R.id.switchSettingsTheme)
 
-        themeSwitch.isChecked = loadThemeSetting()
+        viewModel.themeSettings.observe(this, Observer { settings ->
+            themeSwitch.isChecked = settings.isDarkTheme
+            AppCompatDelegate.setDefaultNightMode(
+                if (settings.isDarkTheme) AppCompatDelegate.MODE_NIGHT_YES else AppCompatDelegate.MODE_NIGHT_NO
+            )
+        })
+
 
         backButton.setOnClickListener {
             finish()
@@ -41,11 +54,10 @@ class SettingsActivity : AppCompatActivity() {
         }
 
         themeSwitch.setOnCheckedChangeListener { _, isChecked ->
-            saveThemeSetting(isChecked)
-            AppCompatDelegate.setDefaultNightMode(
-                if (isChecked) AppCompatDelegate.MODE_NIGHT_YES else AppCompatDelegate.MODE_NIGHT_NO
-            )
+            viewModel.updateThemeSetting(isChecked)
         }
+
+        viewModel.fetchThemeSettings()
     }
 
     private fun shareAppLink() {
@@ -75,20 +87,12 @@ class SettingsActivity : AppCompatActivity() {
         startActivity(termsIntent)
     }
 
-    private fun saveThemeSetting(isDarkTheme: Boolean) {
-        val prefs = getSharedPreferences(THEME_PREF, Context.MODE_PRIVATE).edit()
-        prefs.putBoolean(DARK_THEME, isDarkTheme)
-        prefs.apply()
-    }
 
-    private fun loadThemeSetting(): Boolean {
-        val prefs = getSharedPreferences(THEME_PREF, Context.MODE_PRIVATE)
-        return prefs.getBoolean(DARK_THEME, false)
-    }
+
+
 
     companion object {
         private const val THEME_PREF = "com.konditsky.playlistmaker.prefs"
-        private const val DARK_THEME = "DARK_THEME"
         private const val EMAIL_ADDRESS = "SternKailar@yandex.ru"
     }
 

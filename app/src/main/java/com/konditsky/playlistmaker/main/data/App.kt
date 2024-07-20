@@ -1,4 +1,4 @@
-package com.konditsky.playlistmaker
+package com.konditsky.playlistmaker.main.data
 
 import android.app.Application
 import android.content.Context
