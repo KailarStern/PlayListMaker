@@ -15,25 +15,33 @@ class AudioPlayerViewModel : ViewModel() {
     private val _currentPosition = MutableLiveData<Int>()
     val currentPosition: LiveData<Int> get() = _currentPosition
 
-    private val _isTrackCompleted = MutableLiveData<Boolean>()
-    val isTrackCompleted: LiveData<Boolean> get() = _isTrackCompleted
-
     init {
         trackPlayer.setOnCompletionListener {
-            _isTrackCompleted.value = true
+            _playbackState.value = false
+            _currentPosition.value = 0
+        }
+
+        (trackPlayer as MediaPlayerManager).currentPosition.observeForever { position ->
+            _currentPosition.value = position
+        }
+
+        trackPlayer.isPlaying.observeForever { isPlaying ->
+            _playbackState.value = isPlaying
         }
     }
 
-    fun playOrPause(url: String) {
+    fun prepare(url: String) {
+        trackPlayer.prepare(url)
+    }
+
+    fun playOrPause() {
         if (trackPlayer.isPlaying()) {
             trackPlayer.pause()
             _playbackState.value = false
         } else {
-            trackPlayer.prepare(url)
             trackPlayer.play()
             _playbackState.value = true
             updateCurrentPosition()
-            _isTrackCompleted.value = false
         }
     }
 
@@ -46,6 +54,22 @@ class AudioPlayerViewModel : ViewModel() {
         trackPlayer.release()
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

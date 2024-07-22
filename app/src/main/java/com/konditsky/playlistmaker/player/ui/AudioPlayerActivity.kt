@@ -8,7 +8,6 @@ import android.widget.TextView
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
-import androidx.lifecycle.Observer
 import com.konditsky.playlistmaker.R
 import com.konditsky.playlistmaker.search.ui.Track
 
@@ -40,21 +39,22 @@ class AudioPlayerActivity : AppCompatActivity() {
 
         initializeUIComponents()
         setupObservers()
-        handler.post(updateRunnable)
 
         val toolbar = findViewById<Toolbar>(R.id.toolbar)
         toolbar.setNavigationOnClickListener {
-            onBackPressed()
+            onBackPressedDispatcher.onBackPressed()
         }
 
         val track = intent.getSerializableExtra("TRACK_DATA") as? Track
         track?.let {
+            viewModel.prepare(it.previewUrl)
             updateTrackInfoUI(it)
         }
 
         playButton.setOnClickListener {
             track?.let {
-                viewModel.playOrPause(it.previewUrl)
+                viewModel.playOrPause()
+                handler.post(updateRunnable)
             }
         }
     }
@@ -73,23 +73,17 @@ class AudioPlayerActivity : AppCompatActivity() {
     }
 
     private fun setupObservers() {
-        viewModel.playbackState.observe(this, Observer { isPlaying ->
+        viewModel.playbackState.observe(this, { isPlaying ->
             if (isPlaying) {
                 playButton.setImageResource(R.drawable.pause_button)
             } else {
                 playButton.setImageResource(R.drawable.play_button)
+                handler.removeCallbacks(updateRunnable)
             }
         })
 
-        viewModel.currentPosition.observe(this, Observer { position ->
+        viewModel.currentPosition.observe(this, { position ->
             currentTimeTextView.text = formatTime(position)
-        })
-
-        viewModel.isTrackCompleted.observe(this, Observer { isCompleted ->
-            if (isCompleted) {
-                playButton.setImageResource(R.drawable.play_button)
-                currentTimeTextView.text = formatTime(0)
-            }
         })
     }
 
@@ -114,6 +108,22 @@ class AudioPlayerActivity : AppCompatActivity() {
         handler.removeCallbacks(updateRunnable)
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

@@ -10,26 +10,23 @@ class MediaPlayerManager : TrackPlayer {
     private val _isPlaying = MutableLiveData<Boolean>()
     val isPlaying: LiveData<Boolean> get() = _isPlaying
 
-    private val _error = MutableLiveData<String>()
-    val error: LiveData<String> get() = _error
-
     private val _currentPosition = MutableLiveData<Int>()
     val currentPosition: LiveData<Int> get() = _currentPosition
 
+    private var onCompletionListener: (() -> Unit)? = null
+
     init {
-        mediaPlayer.setOnErrorListener { mp, what, extra ->
-            _error.value = "Playback Error: what=$what, extra=$extra"
-            true
-        }
+        mediaPlayer.setOnErrorListener { _, _, _ -> true }
 
         mediaPlayer.setOnPreparedListener {
-            _isPlaying.value = true
-            mediaPlayer.start()
+            _isPlaying.value = false
             updateCurrentPosition()
         }
 
         mediaPlayer.setOnCompletionListener {
             _isPlaying.value = false
+            _currentPosition.value = 0
+            onCompletionListener?.invoke()
         }
     }
 
@@ -69,16 +66,31 @@ class MediaPlayerManager : TrackPlayer {
         return mediaPlayer.currentPosition
     }
 
-    override fun setOnCompletionListener(listener: () -> Unit) {
-        mediaPlayer.setOnCompletionListener {
-            listener()
-        }
+    override fun setOnCompletionListener(onCompletion: () -> Unit) {
+        onCompletionListener = onCompletion
     }
 
-    fun updateCurrentPosition() {
+    private fun updateCurrentPosition() {
         _currentPosition.postValue(mediaPlayer.currentPosition)
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
