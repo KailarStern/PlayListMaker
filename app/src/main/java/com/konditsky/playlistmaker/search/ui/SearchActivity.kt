@@ -4,13 +4,13 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration
+import android.graphics.drawable.Drawable
 import android.net.ConnectivityManager
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.text.Editable
 import android.text.TextWatcher
-import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 import android.view.inputmethod.EditorInfo
@@ -29,6 +29,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.konditsky.playlistmaker.R
 import com.konditsky.playlistmaker.player.ui.AudioPlayerActivity
 import com.konditsky.playlistmaker.search.data.SearchHistoryManager
+import com.konditsky.playlistmaker.search.data.TrackRepositoryImpl
 import com.konditsky.playlistmaker.search.data.api.ApiClient
 import com.konditsky.playlistmaker.search.domain.impl.SearchHistoryInteractorImpl
 
@@ -36,7 +37,7 @@ class SearchActivity : AppCompatActivity() {
     private val viewModel: SearchViewModel by viewModels {
         SearchViewModelFactory(
             SearchHistoryInteractorImpl(SearchHistoryManager(getSharedPreferences(PREFS_NAME, MODE_PRIVATE))),
-            ApiClient.instance
+            TrackRepositoryImpl()
         )
     }
 
@@ -55,7 +56,6 @@ class SearchActivity : AppCompatActivity() {
     private val itemClickHandler = Handler(Looper.getMainLooper())
     private var itemClickRunnable: Runnable? = null
     private val itemClickDelay = 500L
-    private var lastSearchResults: List<Track>? = null
     private var isSearchPerformed = false
 
     @SuppressLint("ClickableViewAccessibility")
@@ -65,6 +65,7 @@ class SearchActivity : AppCompatActivity() {
 
         progressBar = findViewById(R.id.progressBar)
         editTextSearch = findViewById(R.id.editTextSearch)
+        setCursorDrawable(editTextSearch, R.drawable.custom_cursor)
 
         adapter = TrackAdapter(ArrayList()) { track ->
             itemClickRunnable?.let { itemClickHandler.removeCallbacks(it) }
@@ -80,7 +81,33 @@ class SearchActivity : AppCompatActivity() {
         recyclerView = findViewById(R.id.recyclerViewSearchResults)
         recyclerView.adapter = adapter
 
-        setupObservers()
+        viewModel.trackHistory.observe(this, Observer { history ->
+            if (editTextSearch.text.isEmpty() && editTextSearch.hasFocus()) {
+                updateSearchHistoryDisplay(history)
+            }
+        })
+
+        viewModel.searchResults.observe(this, Observer { results ->
+            updateSearchResultsDisplay(results)
+        })
+
+        viewModel.isLoading.observe(this, Observer { isLoading ->
+            if (isLoading) {
+                showProgressBar()
+            } else {
+                hideProgressBar()
+            }
+        })
+
+        viewModel.isError.observe(this, Observer { isError ->
+            if (isError) {
+                serverErrorPlaceholder.visibility = View.VISIBLE
+                noResultsPlaceholder.visibility = View.GONE
+                recyclerView.visibility = View.GONE
+            } else {
+                serverErrorPlaceholder.visibility = View.GONE
+            }
+        })
 
         if (savedInstanceState != null) {
             val isSearching = savedInstanceState.getBoolean("isSearching", false)
@@ -88,15 +115,11 @@ class SearchActivity : AppCompatActivity() {
                 showProgressBar()
             }
             val savedSearchQuery = savedInstanceState.getString(SEARCH_QUERY_KEY) ?: ""
-            val savedResults = savedInstanceState.getSerializable(SEARCH_RESULTS_KEY) as? List<Track>
             if (savedSearchQuery.isNotEmpty()) {
                 editTextSearch.setText(savedSearchQuery)
-                if (savedResults != null) {
-                    updateSearchResultsDisplay(savedResults)
-                } else {
-                    viewModel.searchTracks(savedSearchQuery)
-                }
+                viewModel.searchTracks(savedSearchQuery)
             }
+            viewModel.restoreSearch()
         }
 
         val backButton = findViewById<ImageButton>(R.id.buttonSearchBack)
@@ -152,16 +175,28 @@ class SearchActivity : AppCompatActivity() {
         })
     }
 
+    private fun setCursorDrawable(editText: EditText, drawableResId: Int) {
+        try {
+            val editorField = TextView::class.java.getDeclaredField("mEditor")
+            editorField.isAccessible = true
+            val editor = editorField.get(editText)
+
+            val drawableField = editor.javaClass.getDeclaredField("mCursorDrawable")
+            drawableField.isAccessible = true
+            val cursorDrawable: Drawable? = resources.getDrawable(drawableResId, null)
+            drawableField.set(editor, arrayOf(cursorDrawable, cursorDrawable))
+        } catch (ignored: Exception) {
+        }
+    }
+
     private fun setupUIBehavior() {
         val retryButton = findViewById<Button>(R.id.buttonRetry)
         retryButton.setOnClickListener {
-            Log.d("SearchActivity", "Retry button clicked")
             viewModel.searchTracks(editTextSearch.text.toString())
         }
 
         val backButton = findViewById<ImageButton>(R.id.buttonSearchBack)
         backButton.setOnClickListener {
-            Log.d("SearchActivity", "Back button clicked")
             finish()
         }
 
@@ -235,7 +270,6 @@ class SearchActivity : AppCompatActivity() {
 
     private fun setupObservers() {
         viewModel.trackHistory.observe(this, Observer { history ->
-            Log.d("SearchActivity", "Track history updated: $history")
             if (editTextSearch.text.isEmpty() && editTextSearch.hasFocus()) {
                 updateSearchHistoryDisplay(history)
             } else {
@@ -244,12 +278,10 @@ class SearchActivity : AppCompatActivity() {
         })
 
         viewModel.searchResults.observe(this, Observer { results ->
-            Log.d("SearchActivity", "Search results updated: $results")
             updateSearchResultsDisplay(results)
         })
 
         viewModel.isLoading.observe(this, Observer { isLoading ->
-            Log.d("SearchActivity", "Loading state changed: $isLoading")
             if (isLoading) {
                 showProgressBar()
             } else {
@@ -258,7 +290,6 @@ class SearchActivity : AppCompatActivity() {
         })
 
         viewModel.isError.observe(this, Observer { isError ->
-            Log.d("SearchActivity", "Error state changed: $isError")
             if (isError) {
                 serverErrorPlaceholder.visibility = View.VISIBLE
                 noResultsPlaceholder.visibility = View.GONE
@@ -301,7 +332,6 @@ class SearchActivity : AppCompatActivity() {
     }
 
     private fun updateSearchResultsDisplay(results: List<Track>) {
-        lastSearchResults = results
         isSearchPerformed = editTextSearch.text.isNotEmpty()
         adapter.updateTracks(ArrayList(results))
         if (results.isEmpty() && editTextSearch.text.isNotEmpty()) {
@@ -317,8 +347,7 @@ class SearchActivity : AppCompatActivity() {
         super.onSaveInstanceState(outState)
         outState.putString(SEARCH_QUERY_KEY, editTextSearch.text.toString())
         outState.putBoolean("isSearching", progressBar.visibility == View.VISIBLE)
-        outState.putSerializable(SEARCH_RESULTS_KEY, ArrayList(lastSearchResults))
-        outState.putBoolean(IS_SEARCH_PERFORMED_KEY, isSearchPerformed)
+        outState.putBoolean(IS_SEARCH_PERFORMED_KEY, viewModel.isSearchPerformed.value == true)
     }
 
     override fun onRestoreInstanceState(savedInstanceState: Bundle) {
@@ -328,10 +357,8 @@ class SearchActivity : AppCompatActivity() {
             editTextSearch.setText(savedSearchQuery)
             viewModel.searchTracks(savedSearchQuery)
         }
-        lastSearchResults = savedInstanceState.getSerializable(SEARCH_RESULTS_KEY) as? List<Track>
-        isSearchPerformed = savedInstanceState.getBoolean(IS_SEARCH_PERFORMED_KEY)
-        lastSearchResults?.let {
-            updateSearchResultsDisplay(it)
+        if (savedInstanceState.getBoolean(IS_SEARCH_PERFORMED_KEY)) {
+            viewModel.restoreSearch()
         }
     }
 
@@ -361,6 +388,17 @@ class SearchActivity : AppCompatActivity() {
         private const val IS_SEARCH_PERFORMED_KEY = "is_search_performed"
     }
 }
+
+
+
+
+
+
+
+
+
+
+
 
 
 

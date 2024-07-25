@@ -4,11 +4,23 @@ interface TrackPlayer {
     fun prepare(url: String)
     fun play()
     fun pause()
-    fun release()
     fun isPlaying(): Boolean
     fun getCurrentPosition(): Int
+    fun release()
     fun setOnCompletionListener(onCompletion: () -> Unit)
 }
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

@@ -5,9 +5,9 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.konditsky.playlistmaker.search.data.api.ItunesResponse
+import com.konditsky.playlistmaker.search.domain.TrackRepository
 import com.konditsky.playlistmaker.search.domain.SearchHistoryInteractor
-import com.konditsky.playlistmaker.search.data.api.ItunesService
+import com.konditsky.playlistmaker.search.data.api.ItunesResponse
 import com.konditsky.playlistmaker.search.data.api.TrackResponse
 import kotlinx.coroutines.launch
 import retrofit2.Call
@@ -18,8 +18,9 @@ import java.util.Locale
 
 class SearchViewModel(
     private val searchHistoryInteractor: SearchHistoryInteractor,
-    private val itunesService: ItunesService
+    private val trackRepository: TrackRepository
 ) : ViewModel() {
+
     private val _trackHistory = MutableLiveData<List<Track>>()
     val trackHistory: LiveData<List<Track>> get() = _trackHistory
 
@@ -34,6 +35,8 @@ class SearchViewModel(
 
     private val _isSearchPerformed = MutableLiveData<Boolean>()
     val isSearchPerformed: LiveData<Boolean> get() = _isSearchPerformed
+
+    private var lastQuery: String? = null
 
     fun fetchTrackHistory() {
         viewModelScope.launch {
@@ -57,11 +60,12 @@ class SearchViewModel(
     }
 
     fun searchTracks(query: String) {
+        lastQuery = query
         _isLoading.value = true
         _isError.value = false
         _isSearchPerformed.value = true
 
-        itunesService.search(query).enqueue(object : Callback<ItunesResponse> {
+        trackRepository.search(query).enqueue(object : Callback<ItunesResponse> {
             override fun onResponse(call: Call<ItunesResponse>, response: Response<ItunesResponse>) {
                 _isLoading.value = false
                 if (response.isSuccessful) {
@@ -77,6 +81,29 @@ class SearchViewModel(
                 _isError.value = true
             }
         })
+    }
+
+    fun restoreSearch() {
+        lastQuery?.let {
+            _isLoading.value = true
+            _isError.value = false
+            trackRepository.search(it).enqueue(object : Callback<ItunesResponse> {
+                override fun onResponse(call: Call<ItunesResponse>, response: Response<ItunesResponse>) {
+                    _isLoading.value = false
+                    if (response.isSuccessful) {
+                        val tracks = response.body()?.results?.map { trackResponseToTrack(it) } ?: listOf()
+                        _searchResults.value = tracks
+                    } else {
+                        _isError.value = true
+                    }
+                }
+
+                override fun onFailure(call: Call<ItunesResponse>, t: Throwable) {
+                    _isLoading.value = false
+                    _isError.value = true
+                }
+            })
+        }
     }
 
     private fun trackResponseToTrack(trackResponse: TrackResponse): Track {
@@ -96,6 +123,9 @@ class SearchViewModel(
         )
     }
 }
+
+
+
 
 
 

@@ -8,12 +8,19 @@ import android.widget.TextView
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
+import androidx.lifecycle.Observer
 import com.konditsky.playlistmaker.R
+import com.konditsky.playlistmaker.player.data.TrackPlayerRepositoryImpl
+import com.konditsky.playlistmaker.player.domain.TrackPlayerInteractor
 import com.konditsky.playlistmaker.search.ui.Track
 
 class AudioPlayerActivity : AppCompatActivity() {
-    private val viewModel: AudioPlayerViewModel by viewModels()
-    private lateinit var imageLoader: ImageLoader
+    private val viewModel: AudioPlayerViewModel by viewModels {
+        AudioPlayerViewModelFactory(TrackPlayerInteractor(TrackPlayerRepositoryImpl()))
+    }
+
+    private lateinit var handler: Handler
+    private lateinit var runnable: Runnable
 
     private lateinit var playButton: ImageView
     private lateinit var currentTimeTextView: TextView
@@ -24,18 +31,19 @@ class AudioPlayerActivity : AppCompatActivity() {
     private lateinit var genreTextView: TextView
     private lateinit var countryTextView: TextView
     private lateinit var albumCoverImageView: ImageView
-
-    private val handler = Handler(Looper.getMainLooper())
-    private val updateRunnable = object : Runnable {
-        override fun run() {
-            viewModel.updateCurrentPosition()
-            handler.postDelayed(this, 1000)
-        }
-    }
+    private lateinit var imageLoader: ImageLoader
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_audioplayer)
+
+        handler = Handler(Looper.getMainLooper())
+        runnable = object : Runnable {
+            override fun run() {
+                viewModel.updateCurrentPosition()
+                handler.postDelayed(this, 1000)
+            }
+        }
 
         initializeUIComponents()
         setupObservers()
@@ -52,9 +60,11 @@ class AudioPlayerActivity : AppCompatActivity() {
         }
 
         playButton.setOnClickListener {
-            track?.let {
-                viewModel.playOrPause()
-                handler.post(updateRunnable)
+            viewModel.playOrPause()
+            if (viewModel.screenState.value?.isPlaying == true) {
+                handler.post(runnable)
+            } else {
+                handler.removeCallbacks(runnable)
             }
         }
     }
@@ -73,19 +83,15 @@ class AudioPlayerActivity : AppCompatActivity() {
     }
 
     private fun setupObservers() {
-        viewModel.playbackState.observe(this, { isPlaying ->
-            if (isPlaying) {
-                playButton.setImageResource(R.drawable.pause_button)
-            } else {
-                playButton.setImageResource(R.drawable.play_button)
-                handler.removeCallbacks(updateRunnable)
+        viewModel.screenState.observe(this, Observer { state ->
+            state?.let {
+                playButton.setImageResource(if (it.isPlaying) R.drawable.pause_button else R.drawable.play_button)
+                currentTimeTextView.text = formatTime(it.currentPosition)
             }
         })
-
-        viewModel.currentPosition.observe(this, { position ->
-            currentTimeTextView.text = formatTime(position)
-        })
     }
+
+
 
     private fun updateTrackInfoUI(track: Track) {
         trackNameTextView.text = track.trackName
@@ -105,9 +111,23 @@ class AudioPlayerActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        handler.removeCallbacks(updateRunnable)
+        handler.removeCallbacks(runnable)
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

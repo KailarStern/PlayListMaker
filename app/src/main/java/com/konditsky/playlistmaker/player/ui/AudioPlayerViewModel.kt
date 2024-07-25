@@ -3,57 +3,72 @@ package com.konditsky.playlistmaker.player.ui
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.konditsky.playlistmaker.player.domain.MediaPlayerManager
-import com.konditsky.playlistmaker.player.domain.TrackPlayer
+import com.konditsky.playlistmaker.player.domain.TrackPlayerInteractor
 
-class AudioPlayerViewModel : ViewModel() {
-    private val trackPlayer: TrackPlayer = MediaPlayerManager()
+data class AudioPlayerState(
+    val isPlaying: Boolean,
+    val currentPosition: Int
+)
 
-    private val _playbackState = MutableLiveData<Boolean>()
-    val playbackState: LiveData<Boolean> = _playbackState
 
-    private val _currentPosition = MutableLiveData<Int>()
-    val currentPosition: LiveData<Int> get() = _currentPosition
+class AudioPlayerViewModel(private val trackPlayerInteractor: TrackPlayerInteractor) : ViewModel() {
+
+    private val _screenState = MutableLiveData<AudioPlayerState>().apply {
+        value = AudioPlayerState(isPlaying = false, currentPosition = 0)
+    }
+
+    val screenState: LiveData<AudioPlayerState> = _screenState
 
     init {
-        trackPlayer.setOnCompletionListener {
-            _playbackState.value = false
-            _currentPosition.value = 0
+        trackPlayerInteractor.isPlaying.observeForever { isPlaying ->
+            _screenState.value = _screenState.value?.copy(isPlaying = isPlaying)
         }
 
-        (trackPlayer as MediaPlayerManager).currentPosition.observeForever { position ->
-            _currentPosition.value = position
+        trackPlayerInteractor.currentPosition.observeForever { position ->
+            _screenState.value = _screenState.value?.copy(currentPosition = position)
         }
 
-        trackPlayer.isPlaying.observeForever { isPlaying ->
-            _playbackState.value = isPlaying
+        trackPlayerInteractor.setOnCompletionListener {
+            _screenState.value = AudioPlayerState(isPlaying = false, currentPosition = 0)
         }
     }
 
     fun prepare(url: String) {
-        trackPlayer.prepare(url)
+        trackPlayerInteractor.prepare(url)
     }
 
     fun playOrPause() {
-        if (trackPlayer.isPlaying()) {
-            trackPlayer.pause()
-            _playbackState.value = false
-        } else {
-            trackPlayer.play()
-            _playbackState.value = true
-            updateCurrentPosition()
-        }
+        trackPlayerInteractor.playOrPause()
     }
 
     fun updateCurrentPosition() {
-        _currentPosition.value = trackPlayer.getCurrentPosition()
+        val position = trackPlayerInteractor.getCurrentPosition()
+        _screenState.value = _screenState.value?.copy(currentPosition = position)
     }
 
     override fun onCleared() {
         super.onCleared()
-        trackPlayer.release()
+        trackPlayerInteractor.release()
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
