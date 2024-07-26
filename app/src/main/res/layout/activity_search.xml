@@ -5,7 +5,7 @@ style="@style/SettingsActivityStyle"
 xmlns:tools="http://schemas.android.com/tools"
 android:layout_width="match_parent"
 android:layout_height="match_parent"
-tools:context=".presentation.SearchActivity"
+tools:context=".search.ui.SearchActivity"
 android:orientation="vertical">
 
 
@@ -53,7 +53,8 @@ android:orientation="vertical">
     android:drawableEnd="@drawable/clear"
     android:drawablePadding="8dp"
     android:imeOptions="actionDone"
-    android:singleLine="true"/>
+    android:singleLine="true"
+    android:textCursorDrawable="@drawable/custom_cursor"/>
 
     <TextView
         android:id="@+id/textViewSearchHistoryLabel"
