@@ -5,7 +5,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration
 import android.graphics.drawable.Drawable
-import android.net.ConnectivityManager
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -29,15 +28,12 @@ import androidx.recyclerview.widget.RecyclerView
 import com.konditsky.playlistmaker.R
 import com.konditsky.playlistmaker.player.ui.AudioPlayerActivity
 import com.konditsky.playlistmaker.search.data.SearchHistoryManager
-import com.konditsky.playlistmaker.search.data.TrackRepositoryImpl
-import com.konditsky.playlistmaker.search.data.api.ApiClient
 import com.konditsky.playlistmaker.search.domain.impl.SearchHistoryInteractorImpl
 
 class SearchActivity : AppCompatActivity() {
     private val viewModel: SearchViewModel by viewModels {
         SearchViewModelFactory(
-            SearchHistoryInteractorImpl(SearchHistoryManager(getSharedPreferences(PREFS_NAME, MODE_PRIVATE))),
-            TrackRepositoryImpl()
+            SearchHistoryInteractorImpl(SearchHistoryManager(getSharedPreferences(PREFS_NAME, MODE_PRIVATE)))
         )
     }
 
@@ -63,6 +59,7 @@ class SearchActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_search)
 
+        // Инициализация всех элементов UI
         progressBar = findViewById(R.id.progressBar)
         editTextSearch = findViewById(R.id.editTextSearch)
         setCursorDrawable(editTextSearch, R.drawable.custom_cursor)
@@ -80,47 +77,6 @@ class SearchActivity : AppCompatActivity() {
 
         recyclerView = findViewById(R.id.recyclerViewSearchResults)
         recyclerView.adapter = adapter
-
-        viewModel.trackHistory.observe(this, Observer { history ->
-            if (editTextSearch.text.isEmpty() && editTextSearch.hasFocus()) {
-                updateSearchHistoryDisplay(history)
-            }
-        })
-
-        viewModel.searchResults.observe(this, Observer { results ->
-            updateSearchResultsDisplay(results)
-        })
-
-        viewModel.isLoading.observe(this, Observer { isLoading ->
-            if (isLoading) {
-                showProgressBar()
-            } else {
-                hideProgressBar()
-            }
-        })
-
-        viewModel.isError.observe(this, Observer { isError ->
-            if (isError) {
-                serverErrorPlaceholder.visibility = View.VISIBLE
-                noResultsPlaceholder.visibility = View.GONE
-                recyclerView.visibility = View.GONE
-            } else {
-                serverErrorPlaceholder.visibility = View.GONE
-            }
-        })
-
-        if (savedInstanceState != null) {
-            val isSearching = savedInstanceState.getBoolean("isSearching", false)
-            if (isSearching) {
-                showProgressBar()
-            }
-            val savedSearchQuery = savedInstanceState.getString(SEARCH_QUERY_KEY) ?: ""
-            if (savedSearchQuery.isNotEmpty()) {
-                editTextSearch.setText(savedSearchQuery)
-                viewModel.searchTracks(savedSearchQuery)
-            }
-            viewModel.restoreSearch()
-        }
 
         val backButton = findViewById<ImageButton>(R.id.buttonSearchBack)
         noResultsPlaceholder = findViewById(R.id.noResultsPlaceholder)
@@ -150,14 +106,31 @@ class SearchActivity : AppCompatActivity() {
         }
 
         progressBar.visibility = View.GONE
+
+        // Вызов функции setupObservers
+        setupObservers()
         setupUIBehavior()
         setupSearch()
         viewModel.fetchTrackHistory()
+
+        if (savedInstanceState != null) {
+            val isSearching = savedInstanceState.getBoolean("isSearching", false)
+            if (isSearching) {
+                showProgressBar()
+            }
+            val savedSearchQuery = savedInstanceState.getString(SEARCH_QUERY_KEY) ?: ""
+            if (savedSearchQuery.isNotEmpty()) {
+                editTextSearch.setText(savedSearchQuery)
+                viewModel.searchTracks(savedSearchQuery)
+            }
+            viewModel.restoreSearch()
+        }
     }
 
     private fun setupSearch() {
         searchRunnable = Runnable {
             viewModel.searchTracks(editTextSearch.text.toString())
+            saveSearchQuery(editTextSearch.text.toString())
         }
 
         editTextSearch.addTextChangedListener(object : TextWatcher {
@@ -217,6 +190,7 @@ class SearchActivity : AppCompatActivity() {
                     viewModel.fetchTrackHistory()
                 } else {
                     viewModel.searchTracks(editTextSearch.text.toString())
+                    saveSearchQuery(editTextSearch.text.toString())
                 }
                 true
             } else {
@@ -384,10 +358,12 @@ class SearchActivity : AppCompatActivity() {
         const val SEARCH_QUERY_KEY = "SEARCH_QUERY"
         private const val PREFS_NAME = "com.konditsky.playlistmaker.prefs"
         private const val SEARCH_QUERY = "search_query"
-        private const val SEARCH_RESULTS_KEY = "search_results"
         private const val IS_SEARCH_PERFORMED_KEY = "is_search_performed"
     }
 }
+
+
+
 
 
 

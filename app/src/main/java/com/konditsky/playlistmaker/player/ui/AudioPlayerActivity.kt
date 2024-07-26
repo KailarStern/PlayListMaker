@@ -61,11 +61,6 @@ class AudioPlayerActivity : AppCompatActivity() {
 
         playButton.setOnClickListener {
             viewModel.playOrPause()
-            if (viewModel.screenState.value?.isPlaying == true) {
-                handler.post(runnable)
-            } else {
-                handler.removeCallbacks(runnable)
-            }
         }
     }
 
@@ -83,15 +78,19 @@ class AudioPlayerActivity : AppCompatActivity() {
     }
 
     private fun setupObservers() {
-        viewModel.screenState.observe(this, Observer { state ->
-            state?.let {
-                playButton.setImageResource(if (it.isPlaying) R.drawable.pause_button else R.drawable.play_button)
-                currentTimeTextView.text = formatTime(it.currentPosition)
+        viewModel.isPlayingLiveData.observe(this, Observer { isPlaying ->
+            playButton.setImageResource(if (isPlaying) R.drawable.pause_button else R.drawable.play_button)
+            if (isPlaying) {
+                handler.post(runnable)
+            } else {
+                handler.removeCallbacks(runnable)
             }
         })
+
+        viewModel.currentPosition.observe(this, Observer { position ->
+            currentTimeTextView.text = formatTime(position)
+        })
     }
-
-
 
     private fun updateTrackInfoUI(track: Track) {
         trackNameTextView.text = track.trackName
@@ -112,8 +111,15 @@ class AudioPlayerActivity : AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
         handler.removeCallbacks(runnable)
+        viewModel.clearResources()
     }
 }
+
+
+
+
+
+
 
 
 

@@ -5,31 +5,17 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.konditsky.playlistmaker.player.domain.TrackPlayerInteractor
 
-data class AudioPlayerState(
-    val isPlaying: Boolean,
-    val currentPosition: Int
-)
-
-
 class AudioPlayerViewModel(private val trackPlayerInteractor: TrackPlayerInteractor) : ViewModel() {
+    private val _isPlayingLiveData = MutableLiveData<Boolean>()
+    val isPlayingLiveData: LiveData<Boolean> get() = _isPlayingLiveData
 
-    private val _screenState = MutableLiveData<AudioPlayerState>().apply {
-        value = AudioPlayerState(isPlaying = false, currentPosition = 0)
-    }
-
-    val screenState: LiveData<AudioPlayerState> = _screenState
+    private val _currentPosition = MutableLiveData<Int>()
+    val currentPosition: LiveData<Int> get() = _currentPosition
 
     init {
-        trackPlayerInteractor.isPlaying.observeForever { isPlaying ->
-            _screenState.value = _screenState.value?.copy(isPlaying = isPlaying)
-        }
-
-        trackPlayerInteractor.currentPosition.observeForever { position ->
-            _screenState.value = _screenState.value?.copy(currentPosition = position)
-        }
-
         trackPlayerInteractor.setOnCompletionListener {
-            _screenState.value = AudioPlayerState(isPlaying = false, currentPosition = 0)
+            _isPlayingLiveData.postValue(false)
+            _currentPosition.postValue(0)
         }
     }
 
@@ -38,19 +24,31 @@ class AudioPlayerViewModel(private val trackPlayerInteractor: TrackPlayerInterac
     }
 
     fun playOrPause() {
-        trackPlayerInteractor.playOrPause()
+        if (trackPlayerInteractor.isPlaying()) {
+            trackPlayerInteractor.pause()
+            _isPlayingLiveData.postValue(false)
+        } else {
+            trackPlayerInteractor.play()
+            _isPlayingLiveData.postValue(true)
+            updateCurrentPosition()
+        }
     }
 
     fun updateCurrentPosition() {
-        val position = trackPlayerInteractor.getCurrentPosition()
-        _screenState.value = _screenState.value?.copy(currentPosition = position)
+        _currentPosition.postValue(trackPlayerInteractor.getCurrentPosition())
     }
 
-    override fun onCleared() {
-        super.onCleared()
+    fun clearResources() {
         trackPlayerInteractor.release()
     }
 }
+
+
+
+
+
+
+
 
 
 

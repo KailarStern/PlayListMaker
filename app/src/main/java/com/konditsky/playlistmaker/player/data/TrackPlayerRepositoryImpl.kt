@@ -1,39 +1,35 @@
 package com.konditsky.playlistmaker.player.data
 
 import android.media.MediaPlayer
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import com.konditsky.playlistmaker.player.domain.TrackPlayer
 
 class TrackPlayerRepositoryImpl : TrackPlayer {
 
     private val mediaPlayer: MediaPlayer = MediaPlayer()
-    private val _isPlayingLiveData = MutableLiveData<Boolean>()
-    val isPlayingLiveData: LiveData<Boolean> get() = _isPlayingLiveData
-
-    private val _currentPosition = MutableLiveData<Int>()
-    val currentPosition: LiveData<Int> get() = _currentPosition
+    private var isPlaying: Boolean = false
+    private var currentPosition: Int = 0
+    private var onCompletion: (() -> Unit)? = null
 
     override fun prepare(url: String) {
         mediaPlayer.reset()
         mediaPlayer.setDataSource(url)
         mediaPlayer.prepare()
         mediaPlayer.setOnCompletionListener {
-            _isPlayingLiveData.postValue(false)
-            _currentPosition.postValue(0)
+            isPlaying = false
+            currentPosition = 0
+            onCompletion?.invoke()
         }
     }
 
-
     override fun play() {
         mediaPlayer.start()
-        _isPlayingLiveData.postValue(true)
+        isPlaying = true
         updateCurrentPosition()
     }
 
     override fun pause() {
         mediaPlayer.pause()
-        _isPlayingLiveData.postValue(false)
+        isPlaying = false
     }
 
     override fun isPlaying(): Boolean {
@@ -49,24 +45,22 @@ class TrackPlayerRepositoryImpl : TrackPlayer {
     }
 
     override fun setOnCompletionListener(onCompletion: () -> Unit) {
-        mediaPlayer.setOnCompletionListener {
-            onCompletion()
-            _isPlayingLiveData.postValue(false)
-            _currentPosition.postValue(0)
-        }
+        this.onCompletion = onCompletion
     }
 
-    fun updateCurrentPosition() {
-        val position = mediaPlayer.currentPosition
-        if (position >= 30000) {
+    private fun updateCurrentPosition() {
+        currentPosition = mediaPlayer.currentPosition
+        if (currentPosition >= 30000) {
             pause()
             mediaPlayer.seekTo(0)
-            _currentPosition.postValue(0)
-        } else {
-            _currentPosition.postValue(position)
+            currentPosition = 0
+            onCompletion?.invoke()
         }
+    }
 }
-}
+
+
+
 
 
 

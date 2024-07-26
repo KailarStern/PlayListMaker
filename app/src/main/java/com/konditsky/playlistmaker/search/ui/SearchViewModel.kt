@@ -65,7 +65,7 @@ class SearchViewModel(
         _isError.value = false
         _isSearchPerformed.value = true
 
-        trackRepository.search(query).enqueue(object : Callback<ItunesResponse> {
+        trackRepository.searchTracks(query).enqueue(object : Callback<ItunesResponse> {
             override fun onResponse(call: Call<ItunesResponse>, response: Response<ItunesResponse>) {
                 _isLoading.value = false
                 if (response.isSuccessful) {
@@ -87,7 +87,7 @@ class SearchViewModel(
         lastQuery?.let {
             _isLoading.value = true
             _isError.value = false
-            trackRepository.search(it).enqueue(object : Callback<ItunesResponse> {
+            trackRepository.searchTracks(it).enqueue(object : Callback<ItunesResponse> {
                 override fun onResponse(call: Call<ItunesResponse>, response: Response<ItunesResponse>) {
                     _isLoading.value = false
                     if (response.isSuccessful) {
@@ -123,6 +123,7 @@ class SearchViewModel(
         )
     }
 }
+
 
 
 
